@@ -58,10 +58,47 @@ export const signup = async (req, res) => {
     }
 };
 
-export const login = (req, res) => {
-    res.send('login route');
+export const login = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res
+                .status(400)
+                .json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordCorrect) {
+            return res
+                .status(400)
+                .json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
+        }
+
+        generateToken(user._id, res);
+
+        res.status(200).json({
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            profilePic: user.profilePic,
+        });
+    } catch (error) {
+        console.log('로그인 중 오류 발생:', error.message);
+        res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    }
 };
 
 export const logout = (req, res) => {
-    res.send('logout route');
+    try {
+        res.cookie('jwt', '', {
+            maxAge: 0,
+        });
+        res.status(200).json({ message: '성공적으로 로그아웃되었습니다.' });
+    } catch (error) {
+        console.log('로그아웃 중 오류 발생:', error.message);
+        res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    }
 };
