@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
 type AuthState = {
-    authUser: string | null;
+    authUser: formData | null;
     isSigningUp: boolean;
     isLoggingIn: boolean;
     isUpdatingProfile: boolean;
@@ -13,12 +13,15 @@ type AuthState = {
     signup: (data: formData) => Promise<void>;
     login: (data: formData) => Promise<void>;
     logout: () => Promise<void>;
+    updateProfile: (data: { profilePic: string }) => Promise<void>;
 };
 
 type formData = {
+    createdAt?: string;
     fullName?: string;
     email: string;
     password: string;
+    profilePic?: string;
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -82,6 +85,23 @@ export const useAuthStore = create<AuthState>((set) => ({
             const errorMessage =
                 err.response?.data?.message || 'Unknown error occurred';
             toast.error(errorMessage);
+        }
+    },
+
+    updateProfile: async (data) => {
+        set({ isUpdatingProfile: true });
+        try {
+            const res = await axiosInstance.put('/auth/update-profile', data);
+            set({ authUser: res.data });
+            toast.success('프로필 사진이 업데이트되었습니다.');
+        } catch (error) {
+            console.log('error in update profile', error);
+            const err = error as AxiosError<{ message: string }>;
+            const errorMessage =
+                err.response?.data?.message || 'Unknown error occurred';
+            toast.error(errorMessage);
+        } finally {
+            set({ isUpdatingProfile: false });
         }
     },
 }));
