@@ -47,7 +47,7 @@ export default function App() {
                 <Route
                     path='/profile'
                     element={
-                        authUser ? <ProfilePage /> : <Navigate to='login' />
+                        authUser ? <ProfilePage /> : <Navigate to='/login' />
                     }
                 />
             </Routes>
