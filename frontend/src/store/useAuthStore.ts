@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { io, Socket } from 'socket.io-client';
+
+const BASE_URL = 'http://localhost:5001';
 
 type AuthState = {
     authUser: formData | null;
@@ -9,12 +12,15 @@ type AuthState = {
     isLoggingIn: boolean;
     isUpdatingProfile: boolean;
     isCheckingAuth: boolean;
-    onlineUsers: string[]
+    onlineUsers: string[];
     checkAuth: () => Promise<void>;
     signup: (data: formData) => Promise<void>;
     login: (data: formData) => Promise<void>;
     logout: () => Promise<void>;
     updateProfile: (data: { profilePic: string }) => Promise<void>;
+    socket: Socket | null;
+    connectSocket: () => void;
+    disconnectSocket: () => void;
 };
 
 type formData = {
@@ -26,18 +32,20 @@ type formData = {
     profilePic?: string;
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
     authUser: null,
     isSigningUp: false,
     isLoggingIn: false,
     isUpdatingProfile: false,
     isCheckingAuth: true,
     onlineUsers: [],
+    socket: null,
 
     checkAuth: async () => {
         try {
             const res = await axiosInstance.get('/auth/check');
             set({ authUser: res.data });
+            get().connectSocket();
         } catch (error) {
             console.log('Error in checkAuth: ', error);
             set({ authUser: null });
@@ -68,6 +76,8 @@ export const useAuthStore = create<AuthState>((set) => ({
             const res = await axiosInstance.post('/auth/login', data);
             set({ authUser: res.data });
             toast.success('로그인되었습니다.');
+
+            get().connectSocket();
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
@@ -83,6 +93,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             await axiosInstance.post('/auth/logout');
             set({ authUser: null });
             toast.success('로그아웃되었습니다.');
+            get().disconnectSocket();
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
@@ -106,5 +117,27 @@ export const useAuthStore = create<AuthState>((set) => ({
         } finally {
             set({ isUpdatingProfile: false });
         }
+    },
+
+    connectSocket: () => {
+        const { authUser } = get();
+        if (!authUser || get().socket?.connected) return;
+
+        const socket = io(BASE_URL, {
+            query: {
+                userId: authUser._id,
+            },
+        });
+        socket.connect();
+
+        set({ socket: socket });
+
+        socket.on('getOnlineUsers', (userIds) => {
+            set({ onlineUsers: userIds });
+        });
+    },
+
+    disconnectSocket: () => {
+        if (get().socket?.connected) get().socket?.disconnect();
     },
 }));

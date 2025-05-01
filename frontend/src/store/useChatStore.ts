@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import { axiosInstance } from '../lib/axios';
 import { AxiosError } from 'axios';
+import { useAuthStore } from './useAuthStore';
 
 type ChatState = {
     messages: MessageType[];
@@ -12,6 +13,8 @@ type ChatState = {
     getUsers: () => Promise<void>;
     getMessages: (userId: string) => Promise<void>;
     sendMessage: (message: MessageType) => Promise<void>;
+    subscribeToMessages: () => void;
+    unsubscribeFromMessages: () => void;
     setSelectedUser: (selectedUser: UserType | null) => void;
 };
 
@@ -22,7 +25,6 @@ type MessageType = {
     text: string;
     image: string | null;
     createdAt?: string;
-    
 };
 
 type UserType = {
@@ -83,6 +85,27 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 err.response?.data?.message || 'Unknown error occurred';
             toast.error(errorMessage);
         }
+    },
+
+    subscribeToMessages: () => {
+        const { selectedUser } = get();
+        if (!selectedUser) return;
+
+        const socket = useAuthStore.getState().socket;
+
+        socket?.on('newMessage', (newMessage) => {
+            const isMessageSentFromSelectedUser =
+                newMessage.senderId === selectedUser._id;
+            if (!isMessageSentFromSelectedUser) return;
+            set({
+                messages: [...get().messages, newMessage],
+            });
+        });
+    },
+
+    unsubscribeFromMessages: () => {
+        const socket = useAuthStore.getState().socket;
+        socket?.off('newMessage');
     },
 
     setSelectedUser: (selectedUser) => set({ selectedUser }),
