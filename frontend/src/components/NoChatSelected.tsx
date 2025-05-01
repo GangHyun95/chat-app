@@ -14,7 +14,7 @@ export default function NoChatSelected() {
 
                 <h2 className='text-2xl font-bold'>Welcome to Chat App!</h2>
                 <p className='text-base-content/60'>
-                    Select a conversation from the sidebar to start chatting
+                    사이드바에서 유저를 선택하면 채팅을 시작할 수 있어요.
                 </p>
             </div>
         </div>

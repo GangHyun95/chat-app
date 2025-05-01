@@ -43,7 +43,7 @@ export default function Navbar() {
                                 </Link>
 
                                 <button
-                                    className='flex gap-2 items-center'
+                                    className='flex gap-2 items-center cursor-pointer'
                                     onClick={logout}
                                 >
                                     <LogOut className='size-5' />

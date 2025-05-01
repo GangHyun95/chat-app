@@ -11,14 +11,18 @@ type ChatState = {
     isMessagesLoading: boolean;
     getUsers: () => Promise<void>;
     getMessages: (userId: string) => Promise<void>;
-    setSelectedUser: (selectedUser: UserType) => void;
+    sendMessage: (message: MessageType) => Promise<void>;
+    setSelectedUser: (selectedUser: UserType | null) => void;
 };
 
 type MessageType = {
-    senderId: string;
-    receiverId: string;
+    _id?: string;
+    senderId?: string;
+    receiverId?: string;
     text: string;
-    image: string;
+    image: string | null;
+    createdAt?: string;
+    
 };
 
 type UserType = {
@@ -28,7 +32,7 @@ type UserType = {
     fullName: string;
 };
 
-export const useChatStore = create<ChatState>((set) => ({
+export const useChatStore = create<ChatState>((set, get) => ({
     messages: [],
     users: [],
     selectedUser: null,
@@ -50,7 +54,7 @@ export const useChatStore = create<ChatState>((set) => ({
         }
     },
 
-    getMessages: async (userId: string) => {
+    getMessages: async (userId) => {
         set({ isMessagesLoading: true });
         try {
             const res = await axiosInstance.get(`/message/${userId}`);
@@ -62,6 +66,22 @@ export const useChatStore = create<ChatState>((set) => ({
             toast.error(errorMessage);
         } finally {
             set({ isMessagesLoading: false });
+        }
+    },
+
+    sendMessage: async (messageData) => {
+        const { selectedUser, messages } = get();
+        try {
+            const res = await axiosInstance.post(
+                `/message/send/${selectedUser?._id}`,
+                messageData
+            );
+            set({ messages: [...messages, res.data] });
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
+            const errorMessage =
+                err.response?.data?.message || 'Unknown error occurred';
+            toast.error(errorMessage);
         }
     },
 
