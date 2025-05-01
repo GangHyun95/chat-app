@@ -9,6 +9,7 @@ type AuthState = {
     isLoggingIn: boolean;
     isUpdatingProfile: boolean;
     isCheckingAuth: boolean;
+    onlineUsers: string[]
     checkAuth: () => Promise<void>;
     signup: (data: formData) => Promise<void>;
     login: (data: formData) => Promise<void>;
@@ -30,6 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     isLoggingIn: false,
     isUpdatingProfile: false,
     isCheckingAuth: true,
+    onlineUsers: [],
 
     checkAuth: async () => {
         try {
