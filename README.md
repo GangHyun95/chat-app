@@ -14,8 +14,8 @@
 
 ## 기술 스택
 
-| JavaScript | TypeScript |  React   | Node.js |  Express   | MongoDB  | socketIO? |
-| :--------: | :--------: | :------: | :-----: | :--------: | :------: | --------- |
+| JavaScript | TypeScript |  React   | Node.js |  Express   | MongoDB  | Socket.io |
+| :--------: | :--------: | :------: | :-----: | :--------: | :------: | :-------: |
 |   ![js]    |   ![ts]    | ![react] | ![node] | ![express] | ![mongo] | ![socket] |
 
 ---
@@ -45,6 +45,8 @@
 ### 5. 상태 관리 (Zustand)
 
 -   Zustand를 사용하여 애플리케이션의 상태를 전역으로 관리합니다.
+
+---
 
 <!-- Stack Icon References -->
 
