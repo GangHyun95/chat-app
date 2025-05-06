@@ -52,7 +52,7 @@ export const signup = async (req, res) => {
             res.status(201).json({
                 accessToken,
                 user: {
-                    ...user._doc,
+                    ...newUser._doc,
                     password: '',
                 },
             });
