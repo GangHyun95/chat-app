@@ -35,6 +35,7 @@ type formData = {
     email: string;
     password: string;
     profilePic?: string;
+    googleId?: string;
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({

@@ -34,6 +34,7 @@ export default function ProfilePage() {
             }
         };
     };
+
     return (
         <div className='h-screen pt-20'>
             <div className='max-w-2xl mx-auto px-4 py-8'>
@@ -116,8 +117,8 @@ export default function ProfilePage() {
                                 </span>
                             </div>
                             <div className='flex items-center justify-between py-2'>
-                                <span>Account Status</span>
-                                <span className='text-green-500'>Active</span>
+                                <span>Type</span>
+                                <span className='text-primary'>{authUser?.googleId ? "Google 회원" : authUser ? "일반 회원" : "Unknown"}</span>
                             </div>
                         </div>
                     </div>
