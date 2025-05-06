@@ -44,7 +44,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
     getUsers: async () => {
         set({ isUsersLoading: true });
         try {
-            const res = await axiosInstance.get('/message/users');
+            const accessToken = useAuthStore.getState().accessToken;
+            const res = await axiosInstance.get('/message/users', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
             set({ users: res.data });
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
@@ -59,7 +64,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
     getMessages: async (userId) => {
         set({ isMessagesLoading: true });
         try {
-            const res = await axiosInstance.get(`/message/${userId}`);
+            const accessToken = useAuthStore.getState().accessToken;
+            const res = await axiosInstance.get(`/message/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
             set({ messages: res.data });
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
@@ -74,9 +84,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
     sendMessage: async (messageData) => {
         const { selectedUser, messages } = get();
         try {
+            const accessToken = useAuthStore.getState().accessToken;
             const res = await axiosInstance.post(
                 `/message/send/${selectedUser?._id}`,
-                messageData
+                messageData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
             );
             set({ messages: [...messages, res.data] });
         } catch (error) {

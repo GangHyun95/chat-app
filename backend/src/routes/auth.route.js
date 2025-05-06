@@ -1,8 +1,10 @@
 import express from 'express';
 import {
-    checkAuth,
+    getGoogleClientId,
+    googleLogin,
     login,
     logout,
+    refreshAccessToken,
     signup,
     updateProfile,
 } from '../controllers/auth.controller.js';
@@ -18,6 +20,10 @@ router.post('/logout', logout);
 
 router.put('/update-profile', protectRoute, updateProfile);
 
-router.get('/check', protectRoute, checkAuth);
+router.get('/refresh-token', refreshAccessToken);
+
+router.post('/google-login', googleLogin);
+
+router.get('/google-client-id', getGoogleClientId);
 
 export default router;

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import AuthImagePattern from '../components/AuthImagePattern';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from 'lucide-react';
+import { Eye, EyeOff, Loader, Loader2, Lock, Mail, MessageSquare } from 'lucide-react';
+import GoogleLoginButton from '../components/googleLoginButton';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -10,12 +12,25 @@ export default function LoginPage() {
         email: '',
         password: '',
     });
-    const { login, isLoggingIn } = useAuthStore();
+    const { login, isLoggingIn, googleClientId, getGoogleClientId } =
+        useAuthStore();
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         login(formData);
     };
+
+    useEffect(() => {
+        getGoogleClientId();
+    }, [getGoogleClientId]);
+
+    if (!googleClientId)
+        return (
+            <div className='flex items-center justify-center h-screen'>
+                <Loader className='size-10 animate-spin' />
+            </div>
+        );
+
     return (
         <div className='min-h-screen grid lg:grid-cols-2'>
             {/* left */}
@@ -116,6 +131,17 @@ export default function LoginPage() {
                                 'Sign in'
                             )}
                         </button>
+
+                        <div className='flex items-center gap-4'>
+                            <div className='flex-1 h-px bg-gray-300' />
+                            <span className='text-sm text-muted-foreground'>
+                                or
+                            </span>
+                            <div className='flex-1 h-px bg-gray-300' />
+                        </div>
+                        <GoogleOAuthProvider clientId={googleClientId}>
+                            <GoogleLoginButton />
+                        </GoogleOAuthProvider>
                     </form>
 
                     <div className='text-center'>

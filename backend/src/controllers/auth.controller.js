@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
-import { generateToken } from '../lib/utils.js';
+import { generateAccessToken, generateRefreshToken } from '../lib/utils.js';
+import jwt from 'jsonwebtoken';
 import cloudinary from '../lib/cloudinary.js';
 
 export const signup = async (req, res) => {
@@ -37,14 +38,25 @@ export const signup = async (req, res) => {
         });
 
         if (newUser) {
-            generateToken(newUser._id, res);
+            const accessToken = generateAccessToken(newUser._id);
+            const refreshToken = generateRefreshToken(newUser._id);
+
+            res.cookie('chatapp_refresh_token', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
             await newUser.save();
 
             res.status(201).json({
-                _id: newUser._id,
-                fullName: newUser.fullName,
-                email: newUser.email,
-                profilePic: newUser.profilePic,
+                accessToken,
+                user: {
+                    _id: newUser._id,
+                    fullName: newUser.fullName,
+                    email: newUser.email,
+                    profilePic: newUser.profilePic,
+                },
             });
         } else {
             res.status(400).json({
@@ -78,13 +90,24 @@ export const login = async (req, res) => {
                 .json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
         }
 
-        generateToken(user._id, res);
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        res.cookie('chatapp_refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
         res.status(200).json({
-            _id: user._id,
-            fullName: user.fullName,
-            email: user.email,
-            profilePic: user.profilePic,
+            accessToken,
+            user: {
+                _id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                profilePic: user.profilePic,
+            },
         });
     } catch (error) {
         console.log('로그인 중 오류 발생:', error.message);
@@ -94,13 +117,122 @@ export const login = async (req, res) => {
 
 export const logout = (req, res) => {
     try {
-        res.cookie('jwt', '', {
-            maxAge: 0,
+        res.clearCookie('chatapp_refresh_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
         });
         res.status(200).json({ message: '성공적으로 로그아웃되었습니다.' });
     } catch (error) {
         console.log('로그아웃 중 오류 발생:', error.message);
         res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    }
+};
+
+export const googleLogin = async (req, res) => {
+    const { code } = req.body;
+
+    try {
+        if (!code) {
+            return res.status(400).json({
+                message: 'Google 로그인 코드가 필요합니다.',
+            });
+        }
+
+        const tokenResponse = await fetch(
+            'https://oauth2.googleapis.com/token',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    client_id: process.env.GOOGLE_CLIENT_ID,
+                    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+                    code,
+                    grant_type: 'authorization_code',
+                    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+                }).toString(),
+            }
+        );
+
+        const tokenData = await tokenResponse.json();
+
+        const { access_token } = tokenData;
+
+        if (!access_token) {
+            return res.status(400).json({
+                message: 'Google Access Token을 가져오지 못했습니다.',
+            });
+        }
+
+        const userInfoResponse = await fetch(
+            'https://www.googleapis.com/oauth2/v3/userinfo',
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                },
+            }
+        );
+        const userInfo = await userInfoResponse.json();
+
+        const { sub: googleId, email, name, picture } = userInfo;
+
+        let user = await User.findOne({ email });
+
+        if (user && !user.googleId) {
+            return res.status(400).json({
+                message: '이 이메일은 이미 일반 계정으로 가입되어 있습니다.',
+            });
+        }
+
+        if (!user) {
+            user = new User({
+                email,
+                fullName: name,
+                googleId,
+                profilePic: picture,
+            });
+            await user.save();
+        }
+
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        res.cookie('chatapp_refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.json({
+            accessToken,
+            user: {
+                id: user._id,
+                email: user.email,
+                fullName: user.fullName,
+                profilePic: user.profilePic,
+            },
+        });
+    } catch (error) {
+        console.error('Google 로그인 오류:', error);
+        res.status(500).json({
+            message: '서버 오류가 발생했습니다.',
+        });
+    }
+};
+
+export const getGoogleClientId = async (req, res) => {
+    try {
+        res.json({
+            googleClientId: process.env.GOOGLE_CLIENT_ID,
+        });
+    } catch (error) {
+        console.error('Google Client ID 가져오기 오류:', error);
+        res.status(500).json({
+            message: '서버 오류가 발생했습니다.',
+        });
     }
 };
 
@@ -126,16 +258,52 @@ export const updateProfile = async (req, res) => {
 
         res.status(200).json(updatedUser);
     } catch (error) {
+        console.log(error);
         console.log('프로필 업데이트 중 오류 발생:', error);
         res.status(500).json({ message: '서버 오류가 발생했습니다.' });
     }
 };
 
-export const checkAuth = (req, res) => {
+export const refreshAccessToken = async (req, res) => {
+    const refreshToken = req.cookies['chatapp_refresh_token'];
     try {
-        res.status(200).json(req.user);
+        if (!refreshToken) {
+            return res.status(401).json({
+                message: 'Refresh Token이 없습니다. 다시 로그인해주세요.',
+            });
+        }
+
+        const decoded = jwt.verify(
+            refreshToken,
+            process.env.REFRESH_TOKEN_SECRET
+        );
+        if (!decoded) {
+            return res.status(403).json({
+                message: 'Refresh Token이 유효하지 않습니다.',
+            });
+        }
+
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return res.status(404).json({
+                message: '사용자를 찾을 수 없습니다.',
+            });
+        }
+
+        const newAccessToken = generateAccessToken(user._id);
+        res.json({
+            accessToken: newAccessToken,
+            user: {
+                _id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                profilePic: user.profilePic,
+            },
+        });
     } catch (error) {
-        console.log('인증 확인 중 오류 발생:', error.message);
-        res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+        console.error('Access Token 갱신 오류:', error);
+        res.status(500).json({
+            message: '서버 오류가 발생했습니다.',
+        });
     }
 };
