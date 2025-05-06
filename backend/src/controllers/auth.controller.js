@@ -52,10 +52,8 @@ export const signup = async (req, res) => {
             res.status(201).json({
                 accessToken,
                 user: {
-                    _id: newUser._id,
-                    fullName: newUser.fullName,
-                    email: newUser.email,
-                    profilePic: newUser.profilePic,
+                    ...user._doc,
+                    password: '',
                 },
             });
         } else {
@@ -103,10 +101,8 @@ export const login = async (req, res) => {
         res.status(200).json({
             accessToken,
             user: {
-                _id: user._id,
-                fullName: user.fullName,
-                email: user.email,
-                profilePic: user.profilePic,
+                ...user._doc,
+                password: '',
             },
         });
     } catch (error) {
@@ -209,10 +205,8 @@ export const googleLogin = async (req, res) => {
         res.json({
             accessToken,
             user: {
-                id: user._id,
-                email: user.email,
-                fullName: user.fullName,
-                profilePic: user.profilePic,
+                ...user._doc,
+                password: '',
             },
         });
     } catch (error) {
@@ -256,7 +250,7 @@ export const updateProfile = async (req, res) => {
             { new: true }
         );
 
-        res.status(200).json(updatedUser);
+        res.status(200).json({ ...updatedUser._doc, password: '' });
     } catch (error) {
         console.log(error);
         console.log('프로필 업데이트 중 오류 발생:', error);
@@ -294,10 +288,8 @@ export const refreshAccessToken = async (req, res) => {
         res.json({
             accessToken: newAccessToken,
             user: {
-                _id: user._id,
-                fullName: user.fullName,
-                email: user.email,
-                profilePic: user.profilePic,
+                ...user._doc,
+                password: '',
             },
         });
     } catch (error) {
