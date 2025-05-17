@@ -7,7 +7,7 @@ export default function MessageInput() {
     const [text, setText] = useState('');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { sendMessage } = useChatStore();
+    const sendMessage = useChatStore((state) => state.sendMessage);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

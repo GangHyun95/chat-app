@@ -10,10 +10,18 @@ import { useThemeStore } from './store/useThemeStore';
 import { useEffect } from 'react';
 import { Loader } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
+import { useShallow } from 'zustand/shallow';
 
 export default function App() {
-    const { checkAuth, isCheckingAuth, accessToken } = useAuthStore();
-    const { theme } = useThemeStore();
+    const { checkAuth, isCheckingAuth, accessToken } = useAuthStore(
+        useShallow((state) => ({
+            checkAuth: state.checkAuth,
+            isCheckingAuth: state.isCheckingAuth,
+            accessToken: state.accessToken,
+            logout: state.logout,
+        }))
+    );
+    const theme = useThemeStore((state) => state.theme);
 
     useEffect(() => {
         checkAuth();

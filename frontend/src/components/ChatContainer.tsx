@@ -5,6 +5,7 @@ import MessageInput from './MessageInput';
 import MessageSkeleton from './skeletons/MessageSkeleton';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatMessageTime } from '../lib/util';
+import { useShallow } from 'zustand/shallow';
 
 export default function ChatContainer() {
     const {
@@ -14,8 +15,17 @@ export default function ChatContainer() {
         selectedUser,
         subscribeToMessages,
         unsubscribeFromMessages,
-    } = useChatStore();
-    const { authUser } = useAuthStore();
+    } = useChatStore(
+        useShallow((state) => ({
+            messages: state.messages,
+            getMessages: state.getMessages,
+            isMessagesLoading: state.isMessagesLoading,
+            selectedUser: state.selectedUser,
+            subscribeToMessages: state.subscribeToMessages,
+            unsubscribeFromMessages: state.unsubscribeFromMessages,
+        }))
+    );
+    const authUser = useAuthStore((state) => state.authUser);
     const messageEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {

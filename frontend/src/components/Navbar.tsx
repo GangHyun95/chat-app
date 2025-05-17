@@ -3,7 +3,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import { LogOut, MessageSquare, Settings, User } from 'lucide-react';
 
 export default function Navbar() {
-    const { logout, accessToken } = useAuthStore();
+    const logout = useAuthStore((state) => state.logout);
+    const accessToken = useAuthStore((state) => state.accessToken);
 
     return (
         <header className='border-b border-base-300 fixed w-full top-0 z-40 backdrop-blur-lg bg-base-100/80'>

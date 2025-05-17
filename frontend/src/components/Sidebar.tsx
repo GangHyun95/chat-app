@@ -3,12 +3,21 @@ import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 import SidebarSkeleton from './skeletons/SidebarSkeleton';
 import { Users } from 'lucide-react';
+import { useShallow } from 'zustand/shallow';
 
 export default function Sidebar() {
     const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } =
-        useChatStore();
+        useChatStore(
+            useShallow((state) => ({
+                getUsers: state.getUsers,
+                users: state.users,
+                selectedUser: state.selectedUser,
+                setSelectedUser: state.setSelectedUser,
+                isUsersLoading: state.isUsersLoading,
+            }))
+        );
 
-    const { onlineUsers } = useAuthStore();
+    const onlineUsers = useAuthStore((state) => state.onlineUsers);
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
     useEffect(() => {

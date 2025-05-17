@@ -2,9 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import AuthImagePattern from '../components/AuthImagePattern';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Loader, Loader2, Lock, Mail, MessageSquare } from 'lucide-react';
+import {
+    Eye,
+    EyeOff,
+    Loader,
+    Loader2,
+    Lock,
+    Mail,
+    MessageSquare,
+} from 'lucide-react';
 import GoogleLoginButton from '../components/googleLoginButton';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useShallow } from 'zustand/shallow';
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -13,7 +22,14 @@ export default function LoginPage() {
         password: '',
     });
     const { login, isLoggingIn, googleClientId, getGoogleClientId } =
-        useAuthStore();
+        useAuthStore(
+            useShallow((state) => ({
+                login: state.login,
+                isLoggingIn: state.isLoggingIn,
+                googleClientId: state.googleClientId,
+                getGoogleClientId: state.getGoogleClientId,
+            }))
+        );
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

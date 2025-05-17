@@ -2,9 +2,16 @@ import { Camera, Mail, User } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useShallow } from 'zustand/shallow';
 
 export default function ProfilePage() {
-    const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
+    const { authUser, isUpdatingProfile, updateProfile } = useAuthStore(
+        useShallow((state) => ({
+            authUser: state.authUser,
+            isUpdatingProfile: state.isUpdatingProfile,
+            updateProfile: state.updateProfile,
+        }))
+    );
     const [selectedImg, setSelectedImg] = useState<string | null>(null);
     const handleImageUpload = async (
         e: React.ChangeEvent<HTMLInputElement>
@@ -12,7 +19,7 @@ export default function ProfilePage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const maxSize = 1 * 1024 * 1024; 
+        const maxSize = 1 * 1024 * 1024;
         if (file.size > maxSize) {
             toast.error(
                 '파일 크기가 너무 큽니다. 최대 1MB까지 업로드할 수 있습니다.'
@@ -118,7 +125,13 @@ export default function ProfilePage() {
                             </div>
                             <div className='flex items-center justify-between py-2'>
                                 <span>Type</span>
-                                <span className='text-primary'>{authUser?.googleId ? "Google 회원" : authUser ? "일반 회원" : "Unknown"}</span>
+                                <span className='text-primary'>
+                                    {authUser?.googleId
+                                        ? 'Google 회원'
+                                        : authUser
+                                        ? '일반 회원'
+                                        : 'Unknown'}
+                                </span>
                             </div>
                         </div>
                     </div>

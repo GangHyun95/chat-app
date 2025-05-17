@@ -4,7 +4,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useGoogleLogin } from '@react-oauth/google';
 
 export default function GoogleLoginButton() {
-    const { googleLogin, isLoggingIn } = useAuthStore();
+    const googleLogin = useAuthStore((state) => state.googleLogin);
+    const isLoggingIn = useAuthStore((state) => state.isLoggingIn);
 
     const googleLoginHandler = useGoogleLogin({
         flow: 'auth-code',
@@ -36,4 +37,3 @@ export default function GoogleLoginButton() {
         </button>
     );
 }
-

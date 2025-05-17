@@ -21,7 +21,8 @@ export default function SignUpPage() {
         password: '',
     });
 
-    const { signup, isSigningUp } = useAuthStore();
+    const signup = useAuthStore((state) => state.signup);
+    const isSigningUp = useAuthStore((state) => state.isSigningUp);
 
     const validateForm = () => {
         if (!formData.fullName.trim())

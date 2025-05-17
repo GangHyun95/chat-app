@@ -3,8 +3,9 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 
 export default function ChatHeader() {
-    const { selectedUser, setSelectedUser } = useChatStore();
-    const { onlineUsers } = useAuthStore();
+    const selectedUser = useChatStore((state) => state.selectedUser);
+    const setSelectedUser = useChatStore((state) => state.setSelectedUser);
+    const onlineUsers = useAuthStore((state) => state.onlineUsers);
     return (
         <div className='p-2.5 border-b border-base-300'>
             <div className='flex items-center justify-between'>
