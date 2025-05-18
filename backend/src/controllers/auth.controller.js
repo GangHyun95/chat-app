@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
-import { generateAccessToken, generateRefreshToken } from '../lib/utils.js';
+import { generateToken } from '../lib/utils.js';
 import jwt from 'jsonwebtoken';
 import cloudinary from '../lib/cloudinary.js';
 
@@ -38,8 +38,8 @@ export const signup = async (req, res) => {
         });
 
         if (newUser) {
-            const accessToken = generateAccessToken(newUser._id);
-            const refreshToken = generateRefreshToken(newUser._id);
+            const accessToken = generateToken(newUser._id, 'access');
+            const refreshToken = generateToken(newUser._id, 'refresh');
 
             res.cookie('chatapp_refresh_token', refreshToken, {
                 httpOnly: true,
@@ -88,8 +88,8 @@ export const login = async (req, res) => {
                 .json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
         }
 
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        const accessToken = generateToken(user._id, 'access');
+        const refreshToken = generateToken(user._id, 'refresh');
 
         res.cookie('chatapp_refresh_token', refreshToken, {
             httpOnly: true,
@@ -127,33 +127,36 @@ export const logout = (req, res) => {
 
 export const googleLogin = async (req, res) => {
     const { code } = req.body;
+    if (!code) {
+        return res.status(400).json({
+            message: 'Google 로그인 코드가 필요합니다.',
+        });
+    }
 
     try {
-        if (!code) {
-            return res.status(400).json({
-                message: 'Google 로그인 코드가 필요합니다.',
+        const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                code,
+                client_id: process.env.GOOGLE_CLIENT_ID || '',
+                client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+                redirect_uri: process.env.GOOGLE_REDIRECT_URI || '',
+                grant_type: 'authorization_code',
+            }).toString(),
+        });
+
+        if (!tokenRes.ok) {
+            res.status(400).json({
+                success: false,
+                message: 'Google 토큰 요청에 실패했습니다.',
             });
+            return;
         }
 
-        const tokenResponse = await fetch(
-            'https://oauth2.googleapis.com/token',
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    client_id: process.env.GOOGLE_CLIENT_ID,
-                    client_secret: process.env.GOOGLE_CLIENT_SECRET,
-                    code,
-                    grant_type: 'authorization_code',
-                    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
-                }).toString(),
-            }
-        );
-
-        const tokenData = await tokenResponse.json();
-
+        const tokenData = await tokenRes.json();
         const { access_token } = tokenData;
 
         if (!access_token) {
@@ -162,7 +165,7 @@ export const googleLogin = async (req, res) => {
             });
         }
 
-        const userInfoResponse = await fetch(
+        const userInfoRes = await fetch(
             'https://www.googleapis.com/oauth2/v3/userinfo',
             {
                 headers: {
@@ -170,30 +173,45 @@ export const googleLogin = async (req, res) => {
                 },
             }
         );
-        const userInfo = await userInfoResponse.json();
 
-        const { sub: googleId, email, name, picture } = userInfo;
-
-        let user = await User.findOne({ email });
-
-        if (user && !user.googleId) {
+        if (!userInfoRes.ok) {
             return res.status(400).json({
-                message: '이 이메일은 이미 일반 계정으로 가입되어 있습니다.',
+                message: 'Google 사용자 정보 요청에 실패했습니다.',
             });
         }
+        const userInfo = await userInfoRes.json();
+        const { sub: googleId, email, name, picture } = userInfo;
 
+        if (!googleId || !email) {
+            res.status(400).json({
+                success: false,
+                message: 'Google 사용자 정보가 유효하지 않습니다.',
+            });
+            return;
+        }
+
+        let user = await User.findOne({ googleId });
         if (!user) {
+            const emailOwner = await User.findOne({ email });
+            if (emailOwner) {
+                res.status(400).json({
+                    success: false,
+                    message: '이미 해당 이메일로 가입된 계정이 있습니다.',
+                });
+                return;
+            }
             user = new User({
                 email,
                 fullName: name,
                 googleId,
                 profilePic: picture,
             });
+
             await user.save();
         }
 
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        const accessToken = generateToken(user._id, 'access');
+        const refreshToken = generateToken(user._id, 'refresh');
 
         res.cookie('chatapp_refresh_token', refreshToken, {
             httpOnly: true,
@@ -202,7 +220,7 @@ export const googleLogin = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        res.json({
+        res.status(200).json({
             accessToken,
             user: {
                 ...user._doc,
@@ -219,7 +237,7 @@ export const googleLogin = async (req, res) => {
 
 export const getGoogleClientId = async (req, res) => {
     try {
-        res.json({
+        res.status(200).json({
             googleClientId: process.env.GOOGLE_CLIENT_ID,
         });
     } catch (error) {
@@ -284,8 +302,8 @@ export const refreshAccessToken = async (req, res) => {
             });
         }
 
-        const newAccessToken = generateAccessToken(user._id);
-        res.json({
+        const newAccessToken = generateToken(user._id, 'access');
+        res.status(200).json({
             accessToken: newAccessToken,
             user: {
                 ...user._doc,
