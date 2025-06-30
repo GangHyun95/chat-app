@@ -50,11 +50,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            set({ users: res.data });
+            set({ users: res.data.data.users });
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
-                err.response?.data?.message || 'Unknown error occurred';
+                err.response?.data.message || 'Unknown error occurred';
             toast.error(errorMessage);
         } finally {
             set({ isUsersLoading: false });
@@ -70,7 +70,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            set({ messages: res.data });
+            set({ messages: res.data.data.messages });
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
@@ -94,7 +94,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                     },
                 }
             );
-            set({ messages: [...messages, res.data] });
+            set({ messages: [...messages, res.data.data.message] });
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
@@ -110,8 +110,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         const socket = useAuthStore.getState().socket;
 
         socket?.on('newMessage', (newMessage) => {
-            const isMessageSentFromSelectedUser =
-                newMessage.senderId === selectedUser._id;
+            const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
             if (!isMessageSentFromSelectedUser) return;
             set({
                 messages: [...get().messages, newMessage],

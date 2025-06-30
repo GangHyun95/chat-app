@@ -16,10 +16,10 @@ type AuthState = {
     isCheckingAuth: boolean;
     onlineUsers: string[];
     googleClientId: string;
+    getMe: () => Promise<void>;
     checkAuth: () => Promise<void>;
     signup: (data: formData) => Promise<void>;
     googleLogin: (code: string) => Promise<void>;
-    getGoogleClientId: () => Promise<void>;
     login: (data: formData) => Promise<void>;
     logout: () => Promise<void>;
     updateProfile: (data: { profilePic: string }) => Promise<void>;
@@ -49,20 +49,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     socket: null,
     googleClientId: '',
 
+    getMe: async () => {
+        try {
+            const res = await axiosInstance.get('/auth/me', {
+                headers: {
+                    Authorization: `Bearer ${get().accessToken}`,
+                },
+            });
+            set({ authUser: res.data.data.user });
+            get().connectSocket();
+
+        } catch (error) {
+            console.error('Error in getMe: ', error);
+            set({ authUser: null });
+        }
+    },
+
     checkAuth: async () => {
         try {
             const res = await axiosInstance.post('/auth/refresh');
-            set({
-                authUser: res.data.user,
-                accessToken: res.data.accessToken,
-            });
-            get().connectSocket();
+            set({ accessToken: res.data.data.accessToken });
         } catch (error) {
             console.log('Error in checkAuth: ', error);
-            set({
-                authUser: null,
-                accessToken: null,
-            });
+            set({ accessToken: null });
         } finally {
             set({ isCheckingAuth: false });
         }
@@ -72,15 +81,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ isSigningUp: true });
         try {
             const res = await axiosInstance.post('/auth/signup', data);
-            set({
-                authUser: res.data.user,
-                accessToken: res.data.accessToken,
-            });
+            set({ accessToken: res.data.data.accessToken });
             toast.success('회원가입이 완료되었습니다!');
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
-                err.response?.data?.message || 'Unknown error occurred';
+                err.response?.data.message || 'Unknown error occurred';
             toast.error(errorMessage);
         } finally {
             set({ isSigningUp: false });
@@ -91,17 +97,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ isLoggingIn: true });
         try {
             const res = await axiosInstance.post('/auth/login', data);
-            set({
-                authUser: res.data.user,
-                accessToken: res.data.accessToken,
-            });
+            set({ accessToken: res.data.data.accessToken });
             toast.success('로그인되었습니다.');
 
             get().connectSocket();
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
-                err.response?.data?.message || 'Unknown error occurred';
+                err.response?.data.message || 'Unknown error occurred';
             toast.error(errorMessage);
         } finally {
             set({ isLoggingIn: false });
@@ -111,16 +114,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     logout: async () => {
         try {
             await axiosInstance.post('/auth/logout');
-            set({
-                authUser: null,
-                accessToken: null,
-            });
+            set({ authUser: null, accessToken: null });
             toast.success('로그아웃되었습니다.');
             get().disconnectSocket();
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
-                err.response?.data?.message || 'Unknown error occurred';
+                err.response?.data.message || 'Unknown error occurred';
             toast.error(errorMessage);
         }
     },
@@ -128,12 +128,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     googleLogin: async (code: string) => {
         set({ isLoggingIn: true });
         try {
-            const res = await axiosInstance.post('/auth/google', {
-                code,
-            });
-            const { accessToken } = res.data;
+            const res = await axiosInstance.post('/auth/google', { code });
+            const { accessToken } = res.data.data;
             if (accessToken) {
-                set({ accessToken, authUser: res.data.user });
+                set({ accessToken  });
                 toast.success('구글 로그인 성공');
             } else {
                 toast.error('구글 로그인 실패');
@@ -141,20 +139,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
-                err.response?.data?.message || 'Unknown error occurred';
+                err.response?.data.message || 'Unknown error occurred';
             toast.error(errorMessage);
         } finally {
             set({ isLoggingIn: false });
-        }
-    },
-
-    getGoogleClientId: async () => {
-        try {
-            const res = await axiosInstance.get('/auth/google');
-            set({ googleClientId: res.data.googleClientId });
-        } catch (error) {
-            console.log('Error: ', error);
-            set({ googleClientId: '' });
         }
     },
 
@@ -166,13 +154,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     Authorization: `Bearer ${get().accessToken}`,
                 },
             });
-            set({ authUser: res.data });
+            set({ authUser: res.data.data.user });
             toast.success('프로필 사진이 업데이트되었습니다.');
         } catch (error) {
             console.log('error in update profile', error);
             const err = error as AxiosError<{ message: string }>;
             const errorMessage =
-                err.response?.data?.message || 'Unknown error occurred';
+                err.response?.data.message || 'Unknown error occurred';
             toast.error(errorMessage);
         } finally {
             set({ isUpdatingProfile: false });
@@ -184,9 +172,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (!authUser || !accessToken || get().socket?.connected) return;
 
         const socket = io(BASE_URL, {
-            auth: {
-                token: accessToken,
-            },
+            auth: { token: accessToken },
         });
         socket.connect();
 

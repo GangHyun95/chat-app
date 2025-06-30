@@ -13,8 +13,9 @@ import { Toaster } from 'react-hot-toast';
 import { useShallow } from 'zustand/shallow';
 
 export default function App() {
-    const { checkAuth, isCheckingAuth, accessToken } = useAuthStore(
+    const { checkAuth, isCheckingAuth, accessToken, getMe } = useAuthStore(
         useShallow((state) => ({
+            getMe: state.getMe,
             checkAuth: state.checkAuth,
             isCheckingAuth: state.isCheckingAuth,
             accessToken: state.accessToken,
@@ -26,6 +27,10 @@ export default function App() {
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
+
+    useEffect(() => {
+        if (accessToken) getMe();
+    }, [getMe, accessToken]);
 
     if (isCheckingAuth && !accessToken)
         return (

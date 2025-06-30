@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import AuthImagePattern from '../components/AuthImagePattern';
 import { Link } from 'react-router-dom';
 import {
     Eye,
     EyeOff,
-    Loader,
     Loader2,
     Lock,
     Mail,
@@ -14,6 +13,7 @@ import {
 import GoogleLoginButton from '../components/googleLoginButton';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useShallow } from 'zustand/shallow';
+import { env } from '../lib/env';
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -21,13 +21,11 @@ export default function LoginPage() {
         email: '',
         password: '',
     });
-    const { login, isLoggingIn, googleClientId, getGoogleClientId } =
+    const { login, isLoggingIn } =
         useAuthStore(
             useShallow((state) => ({
                 login: state.login,
                 isLoggingIn: state.isLoggingIn,
-                googleClientId: state.googleClientId,
-                getGoogleClientId: state.getGoogleClientId,
             }))
         );
 
@@ -35,17 +33,6 @@ export default function LoginPage() {
         e.preventDefault();
         login(formData);
     };
-
-    useEffect(() => {
-        getGoogleClientId();
-    }, [getGoogleClientId]);
-
-    if (!googleClientId)
-        return (
-            <div className='flex items-center justify-center h-screen'>
-                <Loader className='size-10 animate-spin' />
-            </div>
-        );
 
     return (
         <div className='min-h-screen grid lg:grid-cols-2'>
@@ -135,7 +122,7 @@ export default function LoginPage() {
 
                         <button
                             type='submit'
-                            className='btn btn-primary w-full'
+                            className='btn btn-primary w-full text-white'
                             disabled={isLoggingIn}
                         >
                             {isLoggingIn ? (
@@ -155,7 +142,7 @@ export default function LoginPage() {
                             </span>
                             <div className='flex-1 h-px bg-gray-300' />
                         </div>
-                        <GoogleOAuthProvider clientId={googleClientId}>
+                        <GoogleOAuthProvider clientId={env.GOOGLE_CLIENT_ID}>
                             <GoogleLoginButton />
                         </GoogleOAuthProvider>
                     </form>
