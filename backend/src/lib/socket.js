@@ -12,11 +12,11 @@ const io = new Server(server, {
     },
 });
 
-export function getReceiverSocketId(userId) {
-    return userSocketMap[userId];
-}
+const userSocketMap = new Map();
 
-const userSocketMap = {};
+export function getReceiverSocketId(userId) {
+    return userSocketMap.get(userId);
+}
 
 io.on('connection', (socket) => {
     const token = socket.handshake.auth.token;
@@ -29,18 +29,21 @@ io.on('connection', (socket) => {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         const userId = decoded.id;
 
-        if (userId) userSocketMap[userId] = socket.id;
+        if (userId) {
+            userSocketMap.set(userId, socket.id);
 
-        io.emit('getOnlineUsers', Object.keys(userSocketMap));
+            console.log('✅ 연결 후 userSocketMap:', [...userSocketMap.entries()]);
+            io.emit('getOnlineUsers', Array.from(userSocketMap.keys()));
+        }
 
         socket.on('disconnect', () => {
             console.log('disconnected', socket.id);
-            delete userSocketMap[userId];
-            io.emit('getOnlineUsers', Object.keys(userSocketMap));
+            userSocketMap.delete(userId);
+            io.emit('getOnlineUsers', Array.from(userSocketMap.keys()));
         });
     } catch (error) {
         console.error('유효하지 않은 토큰:', error);
-        return socket.disconnect;
+        return socket.disconnect();
     }
 });
 export { io, app, server };

@@ -27,6 +27,15 @@ app.use(
 app.use('/api/auth', authRoutes);
 app.use('/api/message', messageRoutes);
 
+app.get('/env.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.send(`
+        window.__ENV__ = {
+            GOOGLE_CLIENT_ID: "${process.env.GOOGLE_CLIENT_ID}"
+        };
+    `);
+});
+
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../frontend/dist')));
 

@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-    getGoogleClientId,
+    getMe,
     googleLogin,
     login,
     logout,
@@ -11,6 +11,8 @@ import {
 import { protectRoute } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
+
+router.get('/me', protectRoute, getMe);
 
 router.post('/signup', signup);
 
@@ -23,7 +25,5 @@ router.put('/update-profile', protectRoute, updateProfile);
 router.post('/refresh', refreshAccessToken);
 
 router.post('/google', googleLogin);
-
-router.get('/google', getGoogleClientId);
 
 export default router;
