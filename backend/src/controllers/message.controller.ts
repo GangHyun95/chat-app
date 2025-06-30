@@ -1,27 +1,12 @@
-import cloudinary from '../lib/cloudinary.js';
-import { getReceiverSocketId, io } from '../lib/socket.js';
-import Message from '../models/message.model.js';
-import User from '../models/user.model.js';
+import type { Request, Response } from 'express';
+import cloudinary from '../lib/cloudinary.ts';
+import { getReceiverSocketId, io } from '../lib/socket.ts';
+import Message from '../models/message.model.ts';
+import User from '../models/user.model.ts';
 
-export const getUsersForSidebar = async (req, res) => {
-    try {
-        const filteredUsers = await User.find({ _id: { $ne: req.user._id } }).select('_id fullName profilePic').lean();
-        res.status(200).json({ 
-            success: true,
-            message: '유저 목록을 성공적으로 불러왔습니다.',
-            data: { 
-                users: filteredUsers,
-            }
-        });
-    } catch (error) {
-        console.error('Error in getUsersForSidebar: ', error.message);
-        res.status(500).json({ success:false, message: 'Internal server error' });
-    }
-};
-
-export const getMessages = async (req, res) => {
-    const { id: userToChatId } = req.params;
+export const getMessages = async (req: Request, res: Response) => {
     const myId = req.user._id;
+    const { id: userToChatId } = req.params;
     try {
         const messages = await Message.find({
             $or: [
@@ -38,18 +23,19 @@ export const getMessages = async (req, res) => {
             data: { messages }
         });
     } catch (error) {
-        console.error('Error in getMessages controller: ', error.message);
+        console.error('Error in getMessages controller: ', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
 
-export const sendMessage = async (req, res) => {
+export const sendMessage = async (req: Request, res: Response) => {
     const { text, image } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
     if (!text && !image) {
-        return res.status(400).json({ success: false, message: '내용이 없습니다.' });
+        res.status(400).json({ success: false, message: '내용이 없습니다.' });
+        return;
     }
     try {
         let imageUrl;
@@ -79,7 +65,7 @@ export const sendMessage = async (req, res) => {
             data: { message: plainMessage },
         });
     } catch (error) {
-        console.error('Error in sendMessage controller: ', error.message);
+        console.error('Error in sendMessage controller: ', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };

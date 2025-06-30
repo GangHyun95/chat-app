@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
-export const generateToken = (id, type) => {
+export const generateToken = (id: string | Types.ObjectId, type: 'access' | 'refresh') => {
     const secret =
         type === 'access'
             ? process.env.ACCESS_TOKEN_SECRET

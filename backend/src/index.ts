@@ -4,11 +4,13 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 
-import authRoutes from './routes/auth.route.js';
-import messageRoutes from './routes/message.route.js';
+import authRoutes from './routes/auth.route.ts';
+import messageRoutes from './routes/message.route.ts';
+import userRoutes from './routes/user.route.ts';
 
-import { connectToDB } from './lib/db.js';
-import { app, server } from './lib/socket.js';
+import { connectToDB } from './lib/db.ts';
+import { app, server } from './lib/socket.ts';
+import { protectRoute } from './middleware/auth.middleware.ts';
 
 dotenv.config();
 
@@ -25,7 +27,8 @@ app.use(
 );
 
 app.use('/api/auth', authRoutes);
-app.use('/api/message', messageRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/users', protectRoute, userRoutes);
 
 app.get('/env.js', (req, res) => {
     res.setHeader('Content-Type', 'application/javascript');

@@ -14,7 +14,7 @@ const io = new Server(server, {
 
 const userSocketMap = new Map();
 
-export function getReceiverSocketId(userId) {
+export function getReceiverSocketId(userId: string) {
     return userSocketMap.get(userId);
 }
 
@@ -26,7 +26,15 @@ io.on('connection', (socket) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const secret = process.env.ACCESS_TOKEN_SECRET;
+        if (!secret) {
+            throw new Error('Access token secret is not defined');
+        }
+        const decoded = jwt.verify(token, secret);
+        
+        if (!decoded || typeof decoded === 'string' || !('id' in decoded)) {
+            throw new Error('Invalid token payload');
+        }
         const userId = decoded.id;
 
         if (userId) {

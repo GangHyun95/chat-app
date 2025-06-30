@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import type { UserFields } from '../types/user.ts';
 
 const userSchema = new mongoose.Schema(
     {
@@ -18,7 +19,7 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: function () {
+            required: function (this: UserFields) {
                 return !this.googleId;
             },
             minlength: 6,
