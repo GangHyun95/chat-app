@@ -1,11 +1,12 @@
 import { X } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
+import { useSocket } from '../hooks/useSocket';
 
 export default function ChatHeader() {
     const selectedUser = useChatStore((state) => state.selectedUser);
     const setSelectedUser = useChatStore((state) => state.setSelectedUser);
-    const onlineUsers = useAuthStore((state) => state.onlineUsers);
+
+    const { onlineUsers } = useSocket();
     return (
         <div className='p-2.5 border-b border-base-300'>
             <div className='flex items-center justify-between'>

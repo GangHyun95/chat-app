@@ -6,47 +6,43 @@ import MessageSkeleton from './skeletons/MessageSkeleton';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatMessageTime } from '../lib/util';
 import { useShallow } from 'zustand/shallow';
+import { useMessagesByUser } from '../hooks/useMessage';
+import toast from 'react-hot-toast';
+import { useMessagesSubscription } from '../hooks/useMessagesSubscription';
 
 export default function ChatContainer() {
-    const {
-        messages,
-        getMessages,
-        isMessagesLoading,
-        selectedUser,
-        subscribeToMessages,
-        unsubscribeFromMessages,
-    } = useChatStore(
+    const { messages, setMessages, selectedUser } = useChatStore(
         useShallow((state) => ({
             messages: state.messages,
-            getMessages: state.getMessages,
-            isMessagesLoading: state.isMessagesLoading,
+            setMessages: state.setMessages,
             selectedUser: state.selectedUser,
-            subscribeToMessages: state.subscribeToMessages,
-            unsubscribeFromMessages: state.unsubscribeFromMessages,
         }))
     );
     const authUser = useAuthStore((state) => state.authUser);
     const messageEndRef = useRef<HTMLDivElement>(null);
 
+    const { getMessages, isMessagesLoading } = useMessagesByUser();
     useEffect(() => {
-        if (selectedUser) {
-            getMessages(selectedUser._id);
-            subscribeToMessages();
-
-            return () => unsubscribeFromMessages();
-        }
-    }, [
-        selectedUser?._id,
-        getMessages,
-        subscribeToMessages,
-        unsubscribeFromMessages,
-    ]);
+        if (!selectedUser) return;
+        getMessages(
+            { userId: selectedUser._id },
+            {
+                onSuccess: (res) => {
+                    setMessages(res.data.messages);
+                },
+                onError: (msg) => {
+                    toast.error(msg);
+                },
+            }
+        );
+    }, [selectedUser?._id, getMessages]);
 
     useEffect(() => {
         if (messageEndRef.current && messages) {
             messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
+    useMessagesSubscription();
     if (isMessagesLoading) {
         return (
             <div className='flex-1 flex flex-col overflow-auto'>

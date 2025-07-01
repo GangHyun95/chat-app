@@ -4,25 +4,31 @@ import SidebarSkeleton from './skeletons/SidebarSkeleton';
 import { Users } from 'lucide-react';
 import { useShallow } from 'zustand/shallow';
 import { useSocket } from '../hooks/useSocket';
+import { useUserList } from '../hooks/useUser';
+import { User } from '../types/user';
+import toast from 'react-hot-toast';
 
 export default function Sidebar() {
-    const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } =
-        useChatStore(
-            useShallow((state) => ({
-                getUsers: state.getUsers,
-                users: state.users,
-                selectedUser: state.selectedUser,
-                setSelectedUser: state.setSelectedUser,
-                isUsersLoading: state.isUsersLoading,
-            }))
-        );
+    const [users, setUsers] = useState<User[]>([]);
+    const { getUsers, isUsersLoading } = useUserList();
+    const { selectedUser, setSelectedUser } = useChatStore(
+        useShallow((state) => ({
+            selectedUser: state.selectedUser,
+            setSelectedUser: state.setSelectedUser,
+        }))
+    );
+
+    useEffect(() => {
+        getUsers(undefined, {
+            onSuccess: (res) => {
+                setUsers(res.data.users);
+            },
+            onError: (msg) => toast.error(msg),
+        });
+    }, []);
 
     const { onlineUsers } = useSocket();
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
-
-    useEffect(() => {
-        getUsers();
-    }, [getUsers]);
 
     const filteredUsers = showOnlineOnly ? users.filter((user) => onlineUsers.includes(user._id)) : users;
 
