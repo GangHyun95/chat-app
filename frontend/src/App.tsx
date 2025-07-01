@@ -1,22 +1,21 @@
-import { Loader } from 'lucide-react';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import Navbar from '@/components/Navbar';
-import { useCheckAuth, useGetMe } from '@/hooks/useAuth';
-import { useSocket } from '@/hooks/useSocket';
 import { HomePage, LoginPage, ProfilePage, SettingsPage, SignUpPage } from '@/pages';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useThemeStore } from '@/store/useThemeStore';
-
+import { useCheckAuth, useGetMe } from '@/hooks/useAuth';
+import { useSocket } from '@/hooks/useSocket';
+import MainLayout from '@/layouts/MainLayout';
+import ProtectedRoute from '@/routes/ProtectedRoute';
+import { FullPageSpinner } from '@/components/Spinner';
 
 export default function App() {
     const accessToken = useAuthStore(state => state.accessToken);
     const authUser = useAuthStore(state => state.authUser);
-    const theme = useThemeStore((state) => state.theme);
     const setAccessToken = useAuthStore(state => state.setAccessToken);
     const setAuthUser = useAuthStore(state => state.setAuthUser);
+
     const { checkAuth, isCheckingAuth } = useCheckAuth();
     const { getMe, isGettingMe } = useGetMe();
 
@@ -39,42 +38,30 @@ export default function App() {
     useSocket();
 
     if ((isCheckingAuth && !accessToken) || (isGettingMe && authUser))
-        return (
-            <div className='flex items-center justify-center h-screen'>
-                <Loader className='size-10 animate-spin' />
-            </div>
-        );
+        return <FullPageSpinner />
 
     return (
-        <div data-theme={theme}>
-            <Navbar />
-
+        <>
             <Routes>
+                <Route element={<ProtectedRoute isAllowed={!!accessToken} />}>
+                    <Route element={<MainLayout />}>
+                        <Route index element={<HomePage />} />
+                        <Route path='profile' element={<ProfilePage />} />
+                        <Route path='settings' element={<SettingsPage />} />
+                    </Route>
+                </Route>
+
                 <Route
-                    path='/'
-                    element={
-                        accessToken ? <HomePage /> : <Navigate to='/login' />
-                    }
+                    path='/login'
+                    element={!accessToken ? <LoginPage /> : <Navigate to='/' replace />}
                 />
                 <Route
                     path='/signup'
-                    element={
-                        !accessToken ? <SignUpPage /> : <Navigate to='/' />
-                    }
-                />
-                <Route
-                    path='/login'
-                    element={!accessToken ? <LoginPage /> : <Navigate to='/' />}
-                />
-                <Route path='/settings' element={<SettingsPage />} />
-                <Route
-                    path='/profile'
-                    element={
-                        accessToken ? <ProfilePage /> : <Navigate to='/login' />
-                    }
+                    element={!accessToken ? <SignUpPage /> : <Navigate to='/' replace />}
                 />
             </Routes>
+
             <Toaster />
-        </div>
+        </>
     );
 }
