@@ -45,7 +45,7 @@ export default function App() {
             <Routes>
                 <Route element={<ProtectedRoute isAllowed={!!accessToken} />}>
                     <Route element={<MainLayout />}>
-                        <Route index element={<HomePage />} />
+                        <Route path='/:username?' element={<HomePage />} />
                         <Route path='profile' element={<ProfilePage />} />
                         <Route path='settings' element={<SettingsPage />} />
                     </Route>

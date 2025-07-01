@@ -11,7 +11,7 @@ export default function SignUpPage() {
     const setAccessToken = useAuthStore(state => state.setAccessToken);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState<SignupPayload>({
-        fullName: '',
+        username: '',
         email: '',
         password: '',
     });
@@ -19,8 +19,8 @@ export default function SignUpPage() {
     const { signup, isSigningUp} = useSignup();
 
     const validateForm = () => {
-        if (!formData.fullName.trim()) {
-            toast.error('이름을 입력해주세요');
+        if (!formData.username.trim()) {
+            toast.error('유저명을 입력해주세요');
             return false;
         }
         if (!formData.email.trim()) {
@@ -75,9 +75,9 @@ export default function SignUpPage() {
 
                     <form onSubmit={handleSubmit} className='space-y-6'>
                         <div className='form-control'>
-                            <label htmlFor='fullName' className='label'>
+                            <label htmlFor='username' className='label'>
                                 <span className='label-text font-medium'>
-                                    Full Name
+                                    Username
                                 </span>
                             </label>
                             <div className='relative'>
@@ -85,15 +85,15 @@ export default function SignUpPage() {
                                     <User className='size-5 text-base-content/40 z-10' />
                                 </div>
                                 <input
-                                    id='fullName'
+                                    id='username'
                                     type='text'
                                     className={`input input-bordered w-full pl-10`}
-                                    placeholder='이름을 입력하세요.'
-                                    value={formData.fullName}
+                                    placeholder='유저명을 입력하세요.'
+                                    value={formData.username}
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,
-                                            fullName: e.target.value,
+                                            username: e.target.value,
                                         })
                                     }
                                 />

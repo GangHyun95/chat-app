@@ -10,37 +10,47 @@ import { useChatStore } from '@/store/useChatStore';
 
 import ChatHeader from './ChatHeader';
 import MessageInput from './MessageInput';
+import { useParams } from 'react-router-dom';
+import { useUserByUsername } from '@/hooks/useUser';
 
 export default function ChatContainer() {
+    const { username } = useParams();
+    const { getUser, isUserLoading } = useUserByUsername();
+    const { getMessages, isMessagesLoading } = useMessagesByUser();
+
+    const authUser = useAuthStore((state) => state.authUser);
     const messages = useChatStore(state => state.messages);
     const setMessages = useChatStore(state => state.setMessages);
     const selectedUser = useChatStore(state => state.selectedUser);
-    const authUser = useAuthStore((state) => state.authUser);
-    
-    const messageEndRef = useRef<HTMLDivElement | null>(null);
-    const { getMessages, isMessagesLoading } = useMessagesByUser();
-    
-    useEffect(() => {
-        if (!selectedUser) return;
-        getMessages({ userId: selectedUser._id }, {
-            onSuccess: (res) => {
-                setMessages(res.data.messages);
-            },
-            onError: (msg) => {
-                toast.error(msg);
-            },
-        });
-    }, [selectedUser?._id, getMessages]);
+    const setSelectedUser = useChatStore(state => state.setSelectedUser);
+
+    const endRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        if (messageEndRef.current && messages) {
-            messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
+        if (!username) return;
+
+        setMessages([]);
+        getUser({ username }, {
+            onSuccess: ({ data: { user } }) => {
+                getMessages({ userId: user._id }, {
+                    onSuccess: ({ data: { messages } }) => {
+                        setSelectedUser(user);
+                        setMessages(messages);
+                    },
+                    onError: toast.error,
+                });
+            },
+            onError: toast.error,
+        });
+    }, [username]);
+
+    useEffect(() => {
+        endRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
     useMessagesSubscription();
     
-    if (isMessagesLoading) {
+    if (isUserLoading || (isMessagesLoading && messages.length === 0)) {
         return (
             <div className='flex-1 flex flex-col overflow-auto'>
                 <ChatHeader />
@@ -58,7 +68,7 @@ export default function ChatContainer() {
                 {messages.map((message) => (
                     <div
                         key={message._id}
-                        ref={messageEndRef}
+                        ref={endRef}
                         className={`chat ${message.senderId === authUser?._id ? 'chat-end' : 'chat-start'}`}
                     >
                         <div className='chat-image avatar'>
@@ -84,7 +94,7 @@ export default function ChatContainer() {
                                     className='sm:max-w-[200px] rounded-md mb-2'
                                 />
                             )}
-                            {message.text && <p>{message.text}</p>}
+                            {message.text && <p className='whitespace-pre-wrap break-words'>{message.text}</p>}
                         </div>
                     </div>
                 ))}

@@ -21,7 +21,7 @@ export const getUsersForSidebar = async (req: Request, res: Response) => {
 export const getUserByUsername = async (req: Request, res: Response) => {
     const { username } = req.params;
     try {
-        const user = await User.findOne({username}).select('_id, username, profilePic, email').lean();
+        const user = await User.findOne({username}).select('_id username profilePic email').lean();
 
         if (!user) {
             res.status(404).json({ success: false, message: '존재하지 않는 사용자입니다.'});
