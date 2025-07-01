@@ -1,48 +1,57 @@
 import { useState } from 'react';
-import { useAuthStore } from '../store/useAuthStore';
-import {
-    Eye,
-    EyeOff,
-    Loader2,
-    Lock,
-    Mail,
-    MessageSquare,
-    User,
-} from 'lucide-react';
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AuthImagePattern from '../components/AuthImagePattern';
 import toast from 'react-hot-toast';
+import { SignupPayload } from '../types/auth';
+import { useSignup } from '../hooks/useAuth';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function SignUpPage() {
+    const setAccessToken = useAuthStore(state => state.setAccessToken);
     const [showPassword, setShowPassword] = useState(false);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<SignupPayload>({
         fullName: '',
         email: '',
         password: '',
     });
 
-    const signup = useAuthStore((state) => state.signup);
-    const isSigningUp = useAuthStore((state) => state.isSigningUp);
+    const { signup, isSigningUp} = useSignup();
 
     const validateForm = () => {
-        if (!formData.fullName.trim())
-            return toast.error('이름을 입력해주세요');
-        if (!formData.email.trim()) return toast.error('이메일을 입력해주세요');
-        if (!formData.password.trim())
-            return toast.error('비밀번호를 입력해주세요');
+        if (!formData.fullName.trim()) {
+            toast.error('이름을 입력해주세요');
+            return false;
+        }
+        if (!formData.email.trim()) {
+            toast.error('이메일을 입력해주세요');
+            return false;
+        }
+        if (!formData.password.trim()) {
+            toast.error('비밀번호를 입력해주세요');
+            return false;
+        }
 
-        if (formData.password.length < 6)
-            return toast.error('비밀번호는 최소 6자 이상이어야 합니다');
+        if (formData.password.length < 6) {
+            toast.error('비밀번호는 최소 6자 이상이어야 합니다');
+            return false;
+        }
 
         return true;
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const success = validateForm();
-
-        if (success === true) signup(formData);
+        if (validateForm()) {
+            await signup(formData, {
+                onSuccess: ({ message, data }) => {
+                    setAccessToken(data.accessToken);
+                    toast.success(message);
+                },
+                onError: (msg) => toast.error(msg),
+            });
+        }
     };
     return (
         <div className='min-h-screen grid lg:grid-cols-2'>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAuthStore } from '../store/useAuthStore';
 import AuthImagePattern from '../components/AuthImagePattern';
 import { Link } from 'react-router-dom';
 import {
@@ -12,26 +11,29 @@ import {
 } from 'lucide-react';
 import GoogleLoginButton from '../components/googleLoginButton';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { useShallow } from 'zustand/shallow';
 import { env } from '../lib/env';
+import { useLogin } from '../hooks/useAuth';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function LoginPage() {
+    const setAccessToken = useAuthStore(state=> state.setAccessToken);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
-    const { login, isLoggingIn } =
-        useAuthStore(
-            useShallow((state) => ({
-                login: state.login,
-                isLoggingIn: state.isLoggingIn,
-            }))
-        );
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const { login, isLoggingIn } = useLogin();
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        login(formData);
+        await login(formData, {
+            onSuccess: ({ message, data }) => {
+                setAccessToken(data.accessToken);
+                toast.success(message);
+            },
+            onError: (msg) => toast.error(msg),
+        });
     };
 
     return (

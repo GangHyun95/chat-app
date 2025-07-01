@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useChatStore } from '../store/useChatStore';
-import { useAuthStore } from '../store/useAuthStore';
 import SidebarSkeleton from './skeletons/SidebarSkeleton';
 import { Users } from 'lucide-react';
 import { useShallow } from 'zustand/shallow';
+import { useSocket } from '../hooks/useSocket';
 
 export default function Sidebar() {
     const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } =
@@ -17,7 +17,7 @@ export default function Sidebar() {
             }))
         );
 
-    const onlineUsers = useAuthStore((state) => state.onlineUsers);
+    const { onlineUsers } = useSocket();
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
     useEffect(() => {

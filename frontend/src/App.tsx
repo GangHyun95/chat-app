@@ -10,29 +10,37 @@ import { useThemeStore } from './store/useThemeStore';
 import { useEffect } from 'react';
 import { Loader } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
-import { useShallow } from 'zustand/shallow';
+import { useCheckAuth, useGetMe } from './hooks/useAuth';
+import { useSocket } from './hooks/useSocket';
 
 export default function App() {
-    const { checkAuth, isCheckingAuth, accessToken, getMe } = useAuthStore(
-        useShallow((state) => ({
-            getMe: state.getMe,
-            checkAuth: state.checkAuth,
-            isCheckingAuth: state.isCheckingAuth,
-            accessToken: state.accessToken,
-            logout: state.logout,
-        }))
-    );
+    const accessToken = useAuthStore(state => state.accessToken);
+    const authUser = useAuthStore(state => state.authUser);
     const theme = useThemeStore((state) => state.theme);
+    const setAccessToken = useAuthStore(state => state.setAccessToken);
+    const setAuthUser = useAuthStore(state => state.setAuthUser);
+    const { checkAuth, isCheckingAuth } = useCheckAuth();
+    const { getMe, isGettingMe } = useGetMe();
 
     useEffect(() => {
-        checkAuth();
-    }, [checkAuth]);
-
+        checkAuth(undefined, {
+            onSuccess: ({ data }) => setAccessToken(data.accessToken),
+            onError: console.error,
+        });
+    }, []);
+    
     useEffect(() => {
-        if (accessToken) getMe();
-    }, [getMe, accessToken]);
+        if (!accessToken) return;
 
-    if (isCheckingAuth && !accessToken)
+        getMe(undefined, {
+            onSuccess: ({ data }) => setAuthUser(data.user),
+            onError: console.error,
+        });
+    }, [accessToken]);
+
+    useSocket();
+
+    if ((isCheckingAuth && !accessToken) || (isGettingMe && authUser))
         return (
             <div className='flex items-center justify-center h-screen'>
                 <Loader className='size-10 animate-spin' />

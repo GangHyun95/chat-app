@@ -1,10 +1,25 @@
 import { Link } from 'react-router-dom';
-import { useAuthStore } from '../store/useAuthStore';
 import { LogOut, MessageSquare, Settings, User } from 'lucide-react';
+import { useLogout } from '../hooks/useAuth';
+import { useAuthStore } from '../store/useAuthStore';
+import toast from 'react-hot-toast';
 
 export default function Navbar() {
-    const logout = useAuthStore((state) => state.logout);
-    const accessToken = useAuthStore((state) => state.accessToken);
+    const accessToken = useAuthStore(state => state.accessToken);
+    const setAccessToken = useAuthStore(state => state.setAccessToken);
+    const setAuthUser = useAuthStore(state => state.setAuthUser);
+    const { logout, isLoggingOut } = useLogout();
+
+    const handleLogout = () => {
+        logout(undefined, {
+            onSuccess: ({ message }) => {
+                setAccessToken(null);
+                setAuthUser(null);
+                toast.success(message);
+            },
+            onError: toast.error,
+        });
+    };
 
     return (
         <header className='border-b border-base-300 fixed w-full top-0 z-40 backdrop-blur-lg bg-base-100/80'>
@@ -45,7 +60,7 @@ export default function Navbar() {
 
                                 <button
                                     className='flex gap-2 items-center cursor-pointer'
-                                    onClick={logout}
+                                    onClick={handleLogout}
                                 >
                                     <LogOut className='size-5' />
                                     <span className='hidden sm:inline'>

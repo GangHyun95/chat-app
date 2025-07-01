@@ -2,44 +2,28 @@ import { Camera, Mail, User } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useShallow } from 'zustand/shallow';
+import { useProfileUpdate } from '../hooks/useUser';
 
 export default function ProfilePage() {
-    const { authUser, isUpdatingProfile, updateProfile } = useAuthStore(
-        useShallow((state) => ({
-            authUser: state.authUser,
-            isUpdatingProfile: state.isUpdatingProfile,
-            updateProfile: state.updateProfile,
-        }))
-    );
-    const [selectedImg, setSelectedImg] = useState<string | null>(null);
-    const handleImageUpload = async (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const authUser = useAuthStore(state => state.authUser);
+    const setAuthUser = useAuthStore(state => state.setAuthUser);
+    const { updateProfile, isUpdatingProfile } = useProfileUpdate();
+    const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
-        const maxSize = 1 * 1024 * 1024;
-        if (file.size > maxSize) {
-            toast.error(
-                '파일 크기가 너무 큽니다. 최대 1MB까지 업로드할 수 있습니다.'
-            );
-            return;
-        }
-
-        const reader = new FileReader();
-
-        reader.readAsDataURL(file);
-
-        reader.onload = async () => {
-            const base64Image = reader.result;
-            if (typeof base64Image === 'string') {
-                setSelectedImg(base64Image);
-                await updateProfile({ profilePic: base64Image });
-            } else {
-                console.error('파일 읽기 실패: Base64 문자열이 아님');
-            }
-        };
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+        const previewUrl = URL.createObjectURL(file);
+        setImagePreviewUrl(previewUrl);
+        const formData = new FormData();
+        formData.append('img', file);
+        await updateProfile(formData, {
+            onSuccess: ({ message, data }) => {
+                toast.success(message);
+                setAuthUser(data.user);
+            },
+            onError: (msg) => toast.error(msg),
+        });
     };
 
     return (
@@ -56,7 +40,7 @@ export default function ProfilePage() {
                         <div className='relative'>
                             <img
                                 src={
-                                    selectedImg ||
+                                    imagePreviewUrl ||
                                     authUser?.profilePic ||
                                     '/avatar.png'
                                 }

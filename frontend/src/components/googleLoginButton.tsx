@@ -2,16 +2,23 @@ import toast from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useGoogleAuth } from '../hooks/useAuth';
 
 export default function GoogleLoginButton() {
-    const googleLogin = useAuthStore((state) => state.googleLogin);
-    const isLoggingIn = useAuthStore((state) => state.isLoggingIn);
+    const setAccessToken = useAuthStore((state) => state.setAccessToken);
+    const { login, isLoggingIn } = useGoogleAuth();
 
     const googleLoginHandler = useGoogleLogin({
         flow: 'auth-code',
         onSuccess: async (response) => {
             const code = response.code;
-            await googleLogin(code);
+            await login({ code }, {
+                onSuccess: ({ data, message }) => {
+                    setAccessToken(data.accessToken);
+                    toast.success(message);
+                },
+                onError: (msg) => toast.error(msg),
+            });
         },
         onError: () => {
             toast.error('Google 로그인 실패');

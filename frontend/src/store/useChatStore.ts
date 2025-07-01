@@ -45,7 +45,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         set({ isUsersLoading: true });
         try {
             const accessToken = useAuthStore.getState().accessToken;
-            const res = await axiosInstance.get('/message/users', {
+            const res = await axiosInstance.get('/users', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -65,7 +65,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         set({ isMessagesLoading: true });
         try {
             const accessToken = useAuthStore.getState().accessToken;
-            const res = await axiosInstance.get(`/message/${userId}`, {
+            const res = await axiosInstance.get(`/messages/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -86,7 +86,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         try {
             const accessToken = useAuthStore.getState().accessToken;
             const res = await axiosInstance.post(
-                `/message/send/${selectedUser?._id}`,
+                `/messages/send/${selectedUser?._id}`,
                 messageData,
                 {
                     headers: {
