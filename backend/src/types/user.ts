@@ -3,7 +3,7 @@ import { Types } from 'mongoose';
 export type UserFields = {
     googleId?: string | null;
     email: string;
-    fullName: string;
+    username: string;
     password?: string | null;
     profilePic: string;
     createdAt: Date;

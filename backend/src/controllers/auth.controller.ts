@@ -23,9 +23,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
-    const { fullName, email, password } = req.body;
+    const { username, email, password } = req.body;
 
-    if (!fullName || !email || !password) {
+    if (!username || !email || !password) {
         res.status(400).json({ success: false, message: '모든 필수 항목을 입력해 주세요.' });
         return;
     }
@@ -42,11 +42,16 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
             res.status(400).json({ success: false, message: '이미 사용 중인 이메일입니다.' });
             return;
         }
+        const usernameExists = await User.exists({ username });
+        if (usernameExists) {
+            res.status(400).json({ success: false, message: '이미 사용 중인 유저명입니다.' });
+            return;
+        }
 
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
 
-        const newUser = new User({ fullName, email, password: hash });
+        const newUser = new User({ username, email, password: hash });
 
         await newUser.save();
         
@@ -180,7 +185,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        const { sub: googleId, email, name, picture } = await userInfoRes.json();
+        const { sub: googleId, email, picture } = await userInfoRes.json();
 
         if (!googleId || !email) {
             res.status(400).json({ success: false, message: 'Google 사용자 정보가 유효하지 않습니다.' });
@@ -195,9 +200,19 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
                 return;
             }
 
+            const base = email.split('@')[0];
+            let username = base;
+
+            const exists = await User.exists({ username });
+            if (exists) {
+                const timestamp = Date.now().toString().slice(-4);
+                const rand = Math.floor(1000 + Math.random() * 9000);
+                username = `${base}_${timestamp}${rand}`
+            }
+
             user = new User({
                 email,
-                fullName: name,
+                username,
                 googleId,
                 profilePic: picture,
             });

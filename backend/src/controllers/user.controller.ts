@@ -4,7 +4,7 @@ import User from '../models/user.model.ts';
 
 export const getUsersForSidebar = async (req: Request, res: Response) => {
     try {
-        const filteredUsers = await User.find({ _id: { $ne: req.user._id } }).select('_id fullName profilePic').lean();
+        const filteredUsers = await User.find({ _id: { $ne: req.user._id } }).select('_id username profilePic').lean();
         res.status(200).json({ 
             success: true,
             message: '유저 목록을 성공적으로 불러왔습니다.',
