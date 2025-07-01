@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useChatStore } from '../store/useChatStore';
-import SidebarSkeleton from './skeletons/SidebarSkeleton';
 import { Users } from 'lucide-react';
-import { useShallow } from 'zustand/shallow';
-import { useSocket } from '../hooks/useSocket';
-import { useUserList } from '../hooks/useUser';
-import { User } from '../types/user';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useShallow } from 'zustand/shallow';
 
+import SidebarSkeleton from '@/components/skeletons/SidebarSkeleton';
+import { useSocket } from '@/hooks/useSocket';
+import { useUserList } from '@/hooks/useUser';
+import { useChatStore } from '@/store/useChatStore';
+import { User } from '@/types/user';
 export default function Sidebar() {
     const [users, setUsers] = useState<User[]>([]);
     const { getUsers, isUsersLoading } = useUserList();

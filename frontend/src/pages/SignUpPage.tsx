@@ -1,12 +1,12 @@
-import { useState } from 'react';
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import AuthImagePattern from '../components/AuthImagePattern';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { SignupPayload } from '../types/auth';
-import { useSignup } from '../hooks/useAuth';
-import { useAuthStore } from '../store/useAuthStore';
+import { Link } from 'react-router-dom';
 
+import AuthImagePattern from '@/components/AuthImagePattern';
+import { useSignup } from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/useAuthStore';
+import { SignupPayload } from '@/types/auth';
 export default function SignUpPage() {
     const setAccessToken = useAuthStore(state => state.setAccessToken);
     const [showPassword, setShowPassword] = useState(false);

@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { useSocket } from './useSocket';
-import { useChatStore } from '../store/useChatStore';
-import { Message } from '../types/message';
+
+import { useSocket } from '@/hooks/useSocket';
+import { useChatStore } from '@/store/useChatStore';
+import { Message } from '@/types/message';
 
 export function useMessagesSubscription() {
     const { socket } = useSocket();

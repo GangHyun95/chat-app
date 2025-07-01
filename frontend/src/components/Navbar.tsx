@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
 import { LogOut, MessageSquare, Settings, User } from 'lucide-react';
-import { useLogout } from '../hooks/useAuth';
-import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
+
+import { useLogout } from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function Navbar() {
     const accessToken = useAuthStore(state => state.accessToken);

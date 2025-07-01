@@ -1,6 +1,7 @@
-import { useThemeStore } from '../store/useThemeStore';
-import { THEMES } from '../constants';
 import { Send } from 'lucide-react';
+
+import { THEMES } from '@/constants';
+import { useThemeStore } from '@/store/useThemeStore';
 
 const PREVIEW_MESSAGES = [
     { id: 1, content: '야', isSent: false },

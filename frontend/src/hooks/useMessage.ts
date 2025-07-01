@@ -1,6 +1,6 @@
-import { useApiAction } from '../service/api/client';
-import { getMessages, sendMessage } from '../service/message';
-import { Message } from '../types/message';
+import { useApiAction } from '@/service/api/client';
+import { getMessages, sendMessage } from '@/service/message';
+import { Message } from '@/types/message';
 
 export function useMessagesByUser() {
     const { action, loading } = useApiAction<{ userId: string }, { data: { messages: Message[] }; message: string }>(getMessages);

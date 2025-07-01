@@ -1,20 +1,14 @@
-import React, { useState } from 'react';
-import AuthImagePattern from '../components/AuthImagePattern';
-import { Link } from 'react-router-dom';
-import {
-    Eye,
-    EyeOff,
-    Loader2,
-    Lock,
-    Mail,
-    MessageSquare,
-} from 'lucide-react';
-import GoogleLoginButton from '../components/googleLoginButton';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { env } from '../lib/env';
-import { useLogin } from '../hooks/useAuth';
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '../store/useAuthStore';
+import { Link } from 'react-router-dom';
+
+import AuthImagePattern from '@/components/AuthImagePattern';
+import GoogleLoginButton from '@/components/googleLoginButton';
+import { useLogin } from '@/hooks/useAuth';
+import { env } from '@/lib/env';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginPage() {
     const setAccessToken = useAuthStore(state=> state.setAccessToken);

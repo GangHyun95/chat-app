@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
-import { useChatStore } from '../store/useChatStore';
-import { useSocket } from '../hooks/useSocket';
+
+import { useSocket } from '@/hooks/useSocket';
+import { useChatStore } from '@/store/useChatStore';
 
 export default function ChatHeader() {
     const selectedUser = useChatStore((state) => state.selectedUser);

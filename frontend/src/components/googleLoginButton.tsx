@@ -1,8 +1,9 @@
-import toast from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
 import { useGoogleLogin } from '@react-oauth/google';
-import { useGoogleAuth } from '../hooks/useAuth';
+import { Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+import { useGoogleAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function GoogleLoginButton() {
     const setAccessToken = useAuthStore((state) => state.setAccessToken);

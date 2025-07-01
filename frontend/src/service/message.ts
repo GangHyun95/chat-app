@@ -1,4 +1,4 @@
-import { axiosInstance } from '../lib/axios';
+import { axiosInstance } from '@/lib/axios';
 
 export const getMessages = async (payload: { userId: string }) => {
     const { userId } = payload;

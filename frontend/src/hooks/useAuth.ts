@@ -1,7 +1,7 @@
-import { LoginPayload, SignupPayload } from '../types/auth';
-import { getMe, googleLogin, login, logout, refreshAccessToken, signup } from '../service/auth';
-import { User } from '../types/user';
-import { useApiAction } from '../service/api/client';
+import { useApiAction } from '@/service/api/client';
+import { getMe, googleLogin, login, logout, refreshAccessToken, signup } from '@/service/auth';
+import { LoginPayload, SignupPayload } from '@/types/auth';
+import { User } from '@/types/user';
 
 export function useSignup() {
     const { action, loading } = useApiAction<SignupPayload, { data: { accessToken: string }, message: string }>(signup);

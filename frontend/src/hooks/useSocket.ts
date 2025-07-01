@@ -1,6 +1,7 @@
-import { io, Socket } from 'socket.io-client';
-import { useAuthStore } from '../store/useAuthStore';
 import { useEffect, useRef, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
+
+import { useAuthStore } from '@/store/useAuthStore';
 
 export const useSocket = () => {
     const authUser = useAuthStore(state => state.authUser);

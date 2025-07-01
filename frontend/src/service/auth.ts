@@ -1,5 +1,5 @@
-import { axiosInstance } from '../lib/axios';
-import { LoginPayload, SignupPayload } from '../types/auth';
+import { axiosInstance } from '@/lib/axios';
+import { LoginPayload, SignupPayload } from '@/types/auth';
 
 export const getMe = async () => {
     const res = await axiosInstance.get('/auth/me', { withAuth: true });

@@ -1,17 +1,15 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import HomePage from './pages/HomePage';
-import SignUpPage from './pages/SignUpPage';
-import LoginPage from './pages/LoginPage';
-import SettingsPage from './pages/SettingsPage';
-import ProfilePage from './pages/ProfilePage';
-import { useAuthStore } from './store/useAuthStore';
-import { useThemeStore } from './store/useThemeStore';
-import { useEffect } from 'react';
 import { Loader } from 'lucide-react';
+import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { useCheckAuth, useGetMe } from './hooks/useAuth';
-import { useSocket } from './hooks/useSocket';
+import { Navigate, Route, Routes } from 'react-router-dom';
+
+import Navbar from '@/components/Navbar';
+import { useCheckAuth, useGetMe } from '@/hooks/useAuth';
+import { useSocket } from '@/hooks/useSocket';
+import { HomePage, LoginPage, ProfilePage, SettingsPage, SignUpPage } from '@/pages';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useThemeStore } from '@/store/useThemeStore';
+
 
 export default function App() {
     const accessToken = useAuthStore(state => state.accessToken);

@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react';
-import { useChatStore } from '../store/useChatStore';
-import ChatHeader from './ChatHeader';
-import MessageInput from './MessageInput';
-import MessageSkeleton from './skeletons/MessageSkeleton';
-import { useAuthStore } from '../store/useAuthStore';
-import { formatMessageTime } from '../lib/util';
-import { useShallow } from 'zustand/shallow';
-import { useMessagesByUser } from '../hooks/useMessage';
 import toast from 'react-hot-toast';
-import { useMessagesSubscription } from '../hooks/useMessagesSubscription';
+import { useShallow } from 'zustand/shallow';
+
+import ChatHeader from '@/components/ChatHeader';
+import MessageInput from '@/components/MessageInput';
+import MessageSkeleton from '@/components/skeletons/MessageSkeleton';
+import { useMessagesByUser } from '@/hooks/useMessage';
+import { useMessagesSubscription } from '@/hooks/useMessagesSubscription';
+import { formatMessageTime } from '@/lib/util';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useChatStore } from '@/store/useChatStore';
 
 export default function ChatContainer() {
     const { messages, setMessages, selectedUser } = useChatStore(

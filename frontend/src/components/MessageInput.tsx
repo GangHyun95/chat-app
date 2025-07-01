@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react';
 import { Image, Send, X } from 'lucide-react';
+import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useChatStore } from '../store/useChatStore';
-import { useSendMessage } from '../hooks/useMessage';
+
+import { useSendMessage } from '@/hooks/useMessage';
+import { useChatStore } from '@/store/useChatStore';
 
 export default function MessageInput() {
     const [text, setText] = useState('');
@@ -47,7 +48,9 @@ export default function MessageInput() {
     };
 
     const resetImage = () => {
-        imagePreviewUrl && URL.revokeObjectURL(imagePreviewUrl);
+        if (imagePreviewUrl) {
+            URL.revokeObjectURL(imagePreviewUrl);
+        }
         setImagePreviewUrl(null);
         setImageFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';

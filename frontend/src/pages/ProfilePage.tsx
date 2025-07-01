@@ -1,8 +1,9 @@
 import { Camera, Mail, User } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useProfileUpdate } from '../hooks/useUser';
+
+import { useProfileUpdate } from '@/hooks/useUser';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function ProfilePage() {
     const authUser = useAuthStore(state => state.authUser);

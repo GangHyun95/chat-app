@@ -1,5 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
-import { useAuthStore } from '../store/useAuthStore';
+
+import { useAuthStore } from '@/store/useAuthStore';
 
 declare module 'axios' {
     export interface AxiosRequestConfig {
