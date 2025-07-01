@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import cloudinary from '../lib/cloudinary.ts';
+import { uploadAndReplaceImage } from '../lib/cloudinary.ts';
 import User from '../models/user.model.ts';
 
 export const getUsersForSidebar = async (req: Request, res: Response) => {
@@ -19,20 +19,20 @@ export const getUsersForSidebar = async (req: Request, res: Response) => {
 };
 
 export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+    const file = req.file;
+    if (!file) {
+        res.status(400).json({ message: '프로필 사진이 필요합니다. '});
+        return;
+    }
     try {
-        const { profilePic } = req.body;
-        const userId = req.user._id;
-
-        if (!profilePic) {
-            res.status(400).json({ message: '프로필 사진이 필요합니다. '});
-            return;
+        let uploadImgUrl = null;
+        if (file) {
+            uploadImgUrl = await uploadAndReplaceImage(req.user.profilePic || null, file.path);
         }
-
-        const uploadResponse = await cloudinary.uploader.upload(profilePic);
         const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { profilePic: uploadResponse.secure_url },
-            { new: true, select: '-password' }
+            req.user._id,
+            { profilePic: uploadImgUrl },
+            { new: true, select: '-password' },
         ).lean();
 
         res.status(200).json({

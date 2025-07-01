@@ -107,6 +107,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
         res.status(200).json({
             success: true,
+            message: '로그인에 성공했습니다.',
             data: { accessToken },
         });
     } catch (error) {
@@ -216,6 +217,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
 
         res.status(200).json({
             success: true,
+            message: '구글 로그인에 성공했습니다.',
             data: {
                 accessToken,
             },
