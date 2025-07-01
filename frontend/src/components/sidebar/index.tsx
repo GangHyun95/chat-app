@@ -6,10 +6,12 @@ import UserList from '@/components/sidebar/UserList';
 import SidebarSkeleton from '@/components/skeletons/SidebarSkeleton';
 import { useSocket } from '@/hooks/useSocket';
 import { useUserList } from '@/hooks/useUser';
+import { useAuthStore } from '@/store/useAuthStore';
 import { User } from '@/types/user';
 
 export default function Sidebar() {
     const [users, setUsers] = useState<User[]>([]);
+    const authUser = useAuthStore(state => state.authUser);
     const { getUsers, isUsersLoading } = useUserList();
 
     useEffect(() => {
@@ -25,6 +27,7 @@ export default function Sidebar() {
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
     const filteredUsers = showOnlineOnly ? users.filter((user) => onlineUsers.includes(user._id)) : users;
+    const otherOnlineUsers = onlineUsers.filter(id => id !== authUser?._id);
 
     if (isUsersLoading) return <SidebarSkeleton />;
 
@@ -50,7 +53,7 @@ export default function Sidebar() {
                         <span className='text-sm'>Show online only</span>
                     </label>
                     <span className='text-xs text-zinc-500'>
-                        ({onlineUsers.length - 1} online)
+                        ({otherOnlineUsers.length} online)
                     </span>
                 </div>
             </div>

@@ -99,7 +99,7 @@ export default function MessageInput() {
 
                     <button
                         type='button'
-                        className={`hidden sm:flex btn btn-circle ${
+                        className={`btn btn-circle ${
                             imagePreviewUrl ? 'text-emerald-500' : 'text-zinc-400'
                         }`}
                         onClick={() => fileInputRef.current?.click()}
@@ -110,7 +110,7 @@ export default function MessageInput() {
                 <button
                     type='submit'
                     className='btn btn-sm btn-circle'
-                    disabled={!text.trim() && !imageFile}
+                    disabled={(!text.trim() && !imageFile) || isSendingMessage}
                 >
                     <Send size={22} />
                 </button>

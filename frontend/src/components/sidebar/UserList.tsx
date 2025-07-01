@@ -1,5 +1,6 @@
-import { User } from '@/types/user';
 import { useNavigate, useParams } from 'react-router-dom';
+
+import { User } from '@/types/user';
 
 type Props = {
     user: User;

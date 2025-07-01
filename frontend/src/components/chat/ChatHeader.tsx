@@ -1,11 +1,18 @@
 import { X } from 'lucide-react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { useSocket } from '@/hooks/useSocket';
 import { useChatStore } from '@/store/useChatStore';
 
 export default function ChatHeader() {
+    const navigate = useNavigate();
     const selectedUser = useChatStore((state) => state.selectedUser);
     const setSelectedUser = useChatStore((state) => state.setSelectedUser);
+    const handleExitChat = () => {
+        navigate('/');
+        setSelectedUser(null);
+    };
 
     const { onlineUsers } = useSocket();
     return (
@@ -39,7 +46,7 @@ export default function ChatHeader() {
                     </div>
                 </div>
 
-                <button onClick={() => setSelectedUser(null)}>
+                <button className='btn btn-ghost btn-circle' onClick={handleExitChat}>
                     <X />
                 </button>
             </div>

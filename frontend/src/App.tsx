@@ -31,7 +31,11 @@ export default function App() {
 
         getMe(undefined, {
             onSuccess: ({ data }) => setAuthUser(data.user),
-            onError: console.error,
+            onError: (msg) => {
+                setAccessToken(null);
+                setAuthUser(null);
+                console.error(msg);
+            }
         });
     }, [accessToken]);
 

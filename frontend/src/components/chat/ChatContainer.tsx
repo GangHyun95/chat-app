@@ -1,17 +1,18 @@
 import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 
+import { useParams } from 'react-router-dom';
+
 import MessageSkeleton from '@/components/skeletons/MessageSkeleton';
 import { useMessagesByUser } from '@/hooks/useMessage';
 import { useMessagesSubscription } from '@/hooks/useMessagesSubscription';
+import { useUserByUsername } from '@/hooks/useUser';
 import { formatMessageTime } from '@/lib/util';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useChatStore } from '@/store/useChatStore';
 
 import ChatHeader from './ChatHeader';
 import MessageInput from './MessageInput';
-import { useParams } from 'react-router-dom';
-import { useUserByUsername } from '@/hooks/useUser';
 
 export default function ChatContainer() {
     const { username } = useParams();

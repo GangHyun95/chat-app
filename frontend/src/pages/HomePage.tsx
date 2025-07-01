@@ -1,7 +1,8 @@
+import { useParams } from 'react-router-dom';
+
 import ChatContainer from '@/components/chat/ChatContainer';
 import NoChatSelected from '@/components/chat/NoChatSelected';
 import Sidebar from '@/components/sidebar';
-import { useParams } from 'react-router-dom';
 
 export default function HomePage() {
     const { username } = useParams();
