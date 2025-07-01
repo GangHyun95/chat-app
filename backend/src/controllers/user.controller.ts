@@ -18,6 +18,27 @@ export const getUsersForSidebar = async (req: Request, res: Response) => {
     }
 };
 
+export const getUserByUsername = async (req: Request, res: Response) => {
+    const { username } = req.params;
+    try {
+        const user = await User.findOne({username}).select('_id, username, profilePic, email').lean();
+
+        if (!user) {
+            res.status(404).json({ success: false, message: '존재하지 않는 사용자입니다.'});
+            return;
+        }
+
+        res.status(200).json({
+            success: true,
+            message: '유저 정보를 성공적으로 가져왔습니다.',
+            data: { user },
+        })
+    } catch (error) {
+        console.error('Error in getUserByUsername:', error);
+        res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+    }
+};
+
 export const updateProfile = async (req: Request, res: Response): Promise<void> => {
     const file = req.file;
     if (!file) {
