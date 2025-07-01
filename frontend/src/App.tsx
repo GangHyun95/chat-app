@@ -37,7 +37,7 @@ export default function App() {
 
     useSocket();
 
-    if ((isCheckingAuth && !accessToken) || (isGettingMe && authUser))
+    if ((isCheckingAuth && !accessToken) || (isGettingMe && !authUser))
         return <FullPageSpinner />
 
     return (

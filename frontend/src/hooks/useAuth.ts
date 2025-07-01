@@ -19,12 +19,12 @@ export function useLogout() {
 }
 
 export function useCheckAuth() {
-    const { action, loading } = useApiAction<void, { data: { accessToken: string }, message: string }>(refreshAccessToken);
+    const { action, loading } = useApiAction<void, { data: { accessToken: string }, message: string }>(refreshAccessToken, true);
     return { checkAuth: action, isCheckingAuth: loading };
 }
 
 export function useGetMe() {
-    const { action, loading } = useApiAction<void, { data: { user: User }, message: string }>(getMe);
+    const { action, loading } = useApiAction<void, { data: { user: User }, message: string }>(getMe, true);
     return { getMe: action, isGettingMe: loading };
 }
 
