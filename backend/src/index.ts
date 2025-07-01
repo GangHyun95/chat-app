@@ -27,7 +27,7 @@ app.use(
 );
 
 app.use('/api/auth', authRoutes);
-app.use('/api/messages', messageRoutes);
+app.use('/api/messages', protectRoute, messageRoutes);
 app.use('/api/users', protectRoute, userRoutes);
 
 app.get('/env.js', (req, res) => {

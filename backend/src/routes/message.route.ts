@@ -1,14 +1,11 @@
 import express from 'express';
-import { protectRoute } from '../middleware/auth.middleware.ts';
-import {
-    getMessages,
-    sendMessage,
-} from '../controllers/message.controller.ts';
+import { getMessages, sendMessage } from '../controllers/message.controller.ts';
+import { upload } from '../middleware/upload.middleware.ts';
 
 const router = express.Router();
 
-router.get('/:id', protectRoute, getMessages);
+router.get('/', getMessages);
 
-router.post('/send/:id', protectRoute, sendMessage);
+router.post('/send/:id',upload.single('img'), sendMessage);
 
 export default router;

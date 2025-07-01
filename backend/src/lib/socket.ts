@@ -40,7 +40,6 @@ io.on('connection', (socket) => {
         if (userId) {
             userSocketMap.set(userId, socket.id);
 
-            console.log('✅ 연결 후 userSocketMap:', [...userSocketMap.entries()]);
             io.emit('getOnlineUsers', Array.from(userSocketMap.keys()));
         }
 

@@ -5,9 +5,9 @@ export type UserFields = {
     email: string;
     fullName: string;
     password?: string | null;
-    profilePic?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    profilePic: string;
+    createdAt: Date;
+    updatedAt: Date;
 };
 
 export type UserDoc = UserFields & { _id: Types.ObjectId };
