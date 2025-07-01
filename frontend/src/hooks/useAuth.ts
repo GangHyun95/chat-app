@@ -24,7 +24,7 @@ export function useCheckAuth() {
 }
 
 export function useGetMe() {
-    const { action, loading } = useApiAction<void, { data: { user: User }, message: string }>(getMe, true);
+    const { action, loading } = useApiAction<void, { data: { user: User }, message: string }>(getMe);
     return { getMe: action, isGettingMe: loading };
 }
 

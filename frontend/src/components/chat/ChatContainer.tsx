@@ -1,9 +1,6 @@
 import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { useShallow } from 'zustand/shallow';
 
-import ChatHeader from '@/components/ChatHeader';
-import MessageInput from '@/components/MessageInput';
 import MessageSkeleton from '@/components/skeletons/MessageSkeleton';
 import { useMessagesByUser } from '@/hooks/useMessage';
 import { useMessagesSubscription } from '@/hooks/useMessagesSubscription';
@@ -11,31 +8,28 @@ import { formatMessageTime } from '@/lib/util';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useChatStore } from '@/store/useChatStore';
 
-export default function ChatContainer() {
-    const { messages, setMessages, selectedUser } = useChatStore(
-        useShallow((state) => ({
-            messages: state.messages,
-            setMessages: state.setMessages,
-            selectedUser: state.selectedUser,
-        }))
-    );
-    const authUser = useAuthStore((state) => state.authUser);
-    const messageEndRef = useRef<HTMLDivElement>(null);
+import ChatHeader from './ChatHeader';
+import MessageInput from './MessageInput';
 
+export default function ChatContainer() {
+    const messages = useChatStore(state => state.messages);
+    const setMessages = useChatStore(state => state.setMessages);
+    const selectedUser = useChatStore(state => state.selectedUser);
+    const authUser = useAuthStore((state) => state.authUser);
+    
+    const messageEndRef = useRef<HTMLDivElement | null>(null);
     const { getMessages, isMessagesLoading } = useMessagesByUser();
+    
     useEffect(() => {
         if (!selectedUser) return;
-        getMessages(
-            { userId: selectedUser._id },
-            {
-                onSuccess: (res) => {
-                    setMessages(res.data.messages);
-                },
-                onError: (msg) => {
-                    toast.error(msg);
-                },
-            }
-        );
+        getMessages({ userId: selectedUser._id }, {
+            onSuccess: (res) => {
+                setMessages(res.data.messages);
+            },
+            onError: (msg) => {
+                toast.error(msg);
+            },
+        });
     }, [selectedUser?._id, getMessages]);
 
     useEffect(() => {
@@ -43,7 +37,9 @@ export default function ChatContainer() {
             messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
+
     useMessagesSubscription();
+    
     if (isMessagesLoading) {
         return (
             <div className='flex-1 flex flex-col overflow-auto'>
@@ -62,22 +58,14 @@ export default function ChatContainer() {
                 {messages.map((message) => (
                     <div
                         key={message._id}
-                        className={`chat ${
-                            message.senderId === authUser?._id
-                                ? 'chat-end'
-                                : 'chat-start'
-                        }`}
                         ref={messageEndRef}
+                        className={`chat ${message.senderId === authUser?._id ? 'chat-end' : 'chat-start'}`}
                     >
                         <div className='chat-image avatar'>
                             <div className='size-10 rounded-full border'>
                                 <img
                                     src={
-                                        message.senderId === authUser?._id
-                                            ? authUser?.profilePic ||
-                                              '/avatar.png'
-                                            : selectedUser?.profilePic ||
-                                              '/avatar.png'
+                                        message.senderId === authUser?._id ? authUser?.profilePic || '/avatar.png' : selectedUser?.profilePic || '/avatar.png'
                                     }
                                     alt='profile pic'
                                 />
@@ -85,8 +73,7 @@ export default function ChatContainer() {
                         </div>
                         <div className='chat-header mb-1'>
                             <time className='text-xs opacity-50 ml-1'>
-                                {message.createdAt &&
-                                    formatMessageTime(message.createdAt)}
+                                {message.createdAt && formatMessageTime(message.createdAt)}
                             </time>
                         </div>
                         <div className='chat-bubble flex flex-col'>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
-import AuthImagePattern from '@/components/AuthImagePattern';
+import AuthImagePattern from '@/components/auth/AuthImagePattern';
 import { useSignup } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/useAuthStore';
 import { SignupPayload } from '@/types/auth';

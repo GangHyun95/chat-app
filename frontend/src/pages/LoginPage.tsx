@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
-import AuthImagePattern from '@/components/AuthImagePattern';
-import GoogleLoginButton from '@/components/googleLoginButton';
+import AuthImagePattern from '@/components/auth/AuthImagePattern';
+import GoogleLoginButton from '@/components/auth/googleLoginButton';
 import { useLogin } from '@/hooks/useAuth';
 import { env } from '@/lib/env';
 import { useAuthStore } from '@/store/useAuthStore';

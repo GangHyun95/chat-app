@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { HomePage, LoginPage, ProfilePage, SettingsPage, SignUpPage } from '@/pages';
-import { useAuthStore } from '@/store/useAuthStore';
+import { FullPageSpinner } from '@/components/common/Spinner';
 import { useCheckAuth, useGetMe } from '@/hooks/useAuth';
 import { useSocket } from '@/hooks/useSocket';
 import MainLayout from '@/layouts/MainLayout';
+import { HomePage, LoginPage, ProfilePage, SettingsPage, SignUpPage } from '@/pages';
 import ProtectedRoute from '@/routes/ProtectedRoute';
-import { FullPageSpinner } from '@/components/Spinner';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function App() {
     const accessToken = useAuthStore(state => state.accessToken);

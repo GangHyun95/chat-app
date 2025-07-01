@@ -1,22 +1,16 @@
 import { Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useShallow } from 'zustand/shallow';
 
+import UserList from '@/components/sidebar/UserList';
 import SidebarSkeleton from '@/components/skeletons/SidebarSkeleton';
 import { useSocket } from '@/hooks/useSocket';
 import { useUserList } from '@/hooks/useUser';
-import { useChatStore } from '@/store/useChatStore';
 import { User } from '@/types/user';
+
 export default function Sidebar() {
     const [users, setUsers] = useState<User[]>([]);
     const { getUsers, isUsersLoading } = useUserList();
-    const { selectedUser, setSelectedUser } = useChatStore(
-        useShallow((state) => ({
-            selectedUser: state.selectedUser,
-            setSelectedUser: state.setSelectedUser,
-        }))
-    );
 
     useEffect(() => {
         getUsers(undefined, {
@@ -61,39 +55,13 @@ export default function Sidebar() {
                 </div>
             </div>
 
-            <div className='overflow-y-auto w-full py-3'>
+            <div className='overflow-y-auto w-full py-3 flex-1'>
                 {filteredUsers.map((user) => (
-                    <button
+                    <UserList
                         key={user._id}
-                        onClick={() => setSelectedUser(user)}
-                        className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors ${
-                            selectedUser?._id === user._id
-                                ? 'bg-base-300 ring-1 ring-base-300'
-                                : ''
-                        }`}
-                    >
-                        <div className='relative mx-auto lg:mx-0'>
-                            <img
-                                src={user.profilePic || '/avatar.png'}
-                                alt={user.fullName}
-                                className='size-12 object-cover rounded-full'
-                            />
-                            {onlineUsers.includes(user._id) && (
-                                <span className='absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-zinc-900' />
-                            )}
-                        </div>
-
-                        <div className='hidden lg:block text-left min-w-0'>
-                            <div className='font-medium truncate'>
-                                {user.fullName}
-                            </div>
-                            <div className='text-sm text-zinc-400'>
-                                {onlineUsers.includes(user._id)
-                                    ? 'Online'
-                                    : 'Offline'}
-                            </div>
-                        </div>
-                    </button>
+                        user={user}
+                        isOnline={onlineUsers.includes(user._id)}
+                    />
                 ))}
 
                 {filteredUsers.length === 0 && (
