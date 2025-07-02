@@ -81,7 +81,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
     try {
-        const user = await User.findOne({ email }).select('_id password');
+        const user = await User.findOne({ email }).select('_id password').lean();
 
         if (!user) {
             res.status(400).json({ success: false, message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
