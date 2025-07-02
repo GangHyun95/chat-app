@@ -1,4 +1,5 @@
 import express from 'express';
+
 import { getUserByUsername, getUsersForSidebar, updateProfile } from '../controllers/user.controller.ts';
 import { upload } from '../middleware/upload.middleware.ts';
 

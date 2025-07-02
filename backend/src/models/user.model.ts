@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import type { UserFields } from '../types/user.ts';
 
 const userSchema = new mongoose.Schema(

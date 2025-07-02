@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+
 import { uploadAndReplaceImage } from '../lib/cloudinary.ts';
 import User from '../models/user.model.ts';
 

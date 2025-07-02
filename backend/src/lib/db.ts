@@ -1,8 +1,6 @@
 import mongoose from 'mongoose';
 
-const { ConnectionStates } = mongoose;
-
-type ConnState = typeof ConnectionStates[keyof typeof ConnectionStates] | null;
+type ConnState = typeof mongoose.ConnectionStates[keyof typeof mongoose.ConnectionStates] | null;
 
 const connection: { isConnected: ConnState } = { isConnected: null };
 

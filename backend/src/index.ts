@@ -1,16 +1,17 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import path from 'path';
 
-import authRoutes from './routes/auth.route.ts';
-import messageRoutes from './routes/message.route.ts';
-import userRoutes from './routes/user.route.ts';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import express from 'express';
 
 import { connectToDB } from './lib/db.ts';
 import { app, server } from './lib/socket.ts';
 import { protectRoute } from './middleware/auth.middleware.ts';
+import authRoutes from './routes/auth.route.ts';
+import messageRoutes from './routes/message.route.ts';
+import userRoutes from './routes/user.route.ts';
+
 
 dotenv.config();
 

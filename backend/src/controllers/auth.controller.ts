@@ -1,25 +1,16 @@
 import bcrypt from 'bcryptjs';
-import User from '../models/user.model.ts';
-import { generateToken } from '../lib/utils.ts';
-import jwt from 'jsonwebtoken';
 import type { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 
-export const getMe = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const user = await User.findById(req.user._id).select('-password').lean();
-        if (!user) {
-            res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
-            return;
-        }
-        res.status(200).json({
-            success: true,
-            message: '유저 정보를 가져왔습니다.',
-            data: { user },
-        })
-    } catch (error) {
-        console.error('Error in getMe:', error);
-        res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
-    }
+import { generateToken } from '../lib/utils.ts';
+import User from '../models/user.model.ts';
+
+export const getMe = (req: Request, res: Response): void => {
+    res.status(200).json({
+        success: true,
+        message: '유저 정보를 가져왔습니다.',
+        data: { user: req.user },
+    });
 };
 
 export const signup = async (req: Request, res: Response): Promise<void> => {

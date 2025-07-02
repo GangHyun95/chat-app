@@ -1,6 +1,7 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/user.model.ts';
 import type { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+
+import User from '../models/user.model.ts';
 
 export const protectRoute = async (req: Request, res: Response, next: NextFunction) => {
     let token;
@@ -39,7 +40,7 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
             res.status(401).json({ message: '토큰이 제공되지 않았습니다.' });
             return;
         }
-    } catch (error) {
+    } catch {
         res.status(401).json({ message: '토큰 인증에 실패했습니다.' });
         return;
     }
